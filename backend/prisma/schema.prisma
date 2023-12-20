@@ -9,3 +9,65 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+
+  Profile Profile?
+
+  Threads Thread[]
+
+  Likes Like[]
+
+  Followers Follow[] @relation("FollowerToUser")
+
+  Followeds Follow[] @relation("FollowedToUser")
+}
+
+model Profile {
+  id         String  @id @default(uuid())
+  username   String  @unique
+  bio        String?
+  profilePic String?
+
+  User   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+}
+
+model Thread {
+  id       String   @id @default(uuid())
+  content  String
+  pictures String[]
+
+  User   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  Parent   Thread?  @relation("ThreadToThread", fields: [parentId], references: [id])
+  parentId String?
+  Children Thread[] @relation("ThreadToThread")
+
+  Likes Like[]
+}
+
+model Like {
+  id String @id @default(uuid())
+
+  User   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  Thread   Thread @relation(fields: [threadId], references: [id])
+  threadId String
+}
+
+model Follow {
+  id String @id @default(uuid())
+
+  Follower   User   @relation("FollowerToUser", fields: [followerId], references: [id])
+  followerId String
+
+  Followed   User   @relation("FollowedToUser", fields: [followedId], references: [id])
+  followedId String
+}
