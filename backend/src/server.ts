@@ -1,30 +1,15 @@
 import express, {Application} from 'express';
 import { PORT } from "./config/secrets";
-import swaggerUi from 'swagger-ui-express';
-import swaggerJSDoc from 'swagger-jsdoc';
+import { errorHandler, notFound } from "./middlewares/errorMiddleware";
 
-const options = {
-    swaggerDefinition: {
-        info: {
-            title: 'Threads Clone API',
-            version: '1.0.0',
-            description: 'Swagger API with express',
-        },
-        host: 'localhost:8000',
-        basePath: '/',
-    },
-    apis: ['./routes/*.ts'],
-};
-
-const specs = swaggerJSDoc(options);
+import authRouter from './routes/auth';
 
 class Server {
     private app: Application;
     private readonly port: number;
 
     // Routes
-    private readonly apiDocsRoute = '/api-docs';
-    // private readonly authRoute = '/api/auth';
+    private readonly authRoute = '/api/auth';
     // private readonly userRoute = '/api/user';
 
     constructor() {
@@ -37,8 +22,13 @@ class Server {
         this.app.use(express.urlencoded({extended: true}));
     }
 
+    errorHandler() {
+        this.app.use(notFound);
+        this.app.use(errorHandler);
+    }
+
     routes() {
-        this.app.use(this.apiDocsRoute, swaggerUi.serve, swaggerUi.setup(specs));
+        this.app.use(this.authRoute, authRouter);
     }
 
     start() {
@@ -52,4 +42,5 @@ class Server {
 const server = new Server();
 server.basicMiddleware();
 server.routes();
+server.errorHandler();
 server.start();
