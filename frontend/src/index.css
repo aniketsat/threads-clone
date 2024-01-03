@@ -1,5 +1,58 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+main {
+    min-height: 100vh;
+}
+
+.auth-tab-container {
+    width: 420px;
+}
+@media (max-width: 420px) {
+    .auth-tab-container {
+        width: 100%;
+        margin: 0 16px;
+    }
+}
+
+.nav-main-menu {
+    display: flex;
+}
+.nav-side-menu {
+    display: none;
+}
+@media (max-width: 768px) {
+    .nav-main-menu {
+        display: none;
+    }
+    .nav-side-menu {
+        display: flex;
+    }
+}
+
+.main-container {
+    max-width: 420px;
+    justify-content: start;
+    align-items: start;
+    margin: 0 auto;
+}
+@media (max-width: 420px) {
+    .main-container {
+        max-width: 100%;
+    }
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin: auto 8px auto auto;
 }
