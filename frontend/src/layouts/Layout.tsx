@@ -16,6 +16,7 @@ function Layout({children}: { children: React.ReactNode }) {
         setPathname(location.pathname);
     }, [location.pathname]);
 
+
     return (
         <>
             <NextUIProvider>

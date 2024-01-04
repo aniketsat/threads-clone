@@ -1,9 +1,13 @@
 import * as React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import {useSelector} from "react-redux";
+import {useSelector, useDispatch} from "react-redux";
+import {setUser} from "../app/features/userSlice.ts";
+import {useGetCurrentUserQuery} from "../app/services/userApi.ts";
 
 function PrivateRoutes() {
     const navigate = useNavigate();
+
+    const dispatch = useDispatch();
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
@@ -14,6 +18,19 @@ function PrivateRoutes() {
             navigate("/auth");
         }
     }, [isLoggedIn, navigate]);
+    
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const {data} = useGetCurrentUserQuery();
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    React.useEffect(() => {
+        console.log(data);
+        if (data) {
+            dispatch(setUser(data?.user));
+        }
+    }, [data, dispatch]);
+
 
     return (
         <Outlet />

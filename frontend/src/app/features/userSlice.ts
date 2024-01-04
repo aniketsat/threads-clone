@@ -9,6 +9,7 @@ class User {
     createdAt: string | null = null
     updatedAt: string | null = null
     avatar: string | null = null
+    bio: string | null = null
 }
 
 export interface UserState {

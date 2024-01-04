@@ -23,7 +23,7 @@ function App() {
                     <Route path="/search" element={<SearchPage />} />
                     {/*<Route path="/create" element={<h1>Create</h1>} />*/}
                     <Route path="/notifications" element={<NotificationPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/:username" element={<ProfilePage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                 </Route>
             </Routes>

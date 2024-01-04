@@ -2,7 +2,7 @@ import React from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Dropdown, DropdownTrigger,DropdownMenu, DropdownItem, Avatar} from "@nextui-org/react";
 import CreateEditThread from "./CreateEditThread.tsx";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {logout} from "../app/features/userSlice.ts";
 import {useLogoutMutation} from "../app/services/authApi.ts";
 import Loader from "./Loader.tsx";
@@ -16,6 +16,10 @@ type PropType = {
 
 export default function Appbar({darkMode, setDarkMode}: PropType) {
     const dispatch = useDispatch();
+    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const user = useSelector((state) => state.user.user);
 
     const navigate = useNavigate();
 
@@ -56,7 +60,7 @@ export default function Appbar({darkMode, setDarkMode}: PropType) {
         },
         {
             label: "Profile",
-            href: "/profile",
+            href: `@${user.username}`
         },
     ];
 
@@ -67,7 +71,11 @@ export default function Appbar({darkMode, setDarkMode}: PropType) {
                 <NavbarContent>
                     <NavbarMenuToggle aria-label={isMenuOpen ? "Close menu" : "Open menu"} className="nav-side-menu"/>
                     <NavbarBrand>
-                        <p className="font-bold text-inherit">Threads</p>
+                        <p className="font-bold text-inherit" style={{
+                            fontSize: "1.5rem",
+                            lineHeight: "1.75rem",
+                            letterSpacing: "-0.025em",
+                        }}>Threads</p>
                     </NavbarBrand>
                 </NavbarContent>
 
@@ -101,15 +109,15 @@ export default function Appbar({darkMode, setDarkMode}: PropType) {
                                 as="button"
                                 className="transition-transform"
                                 color="secondary"
-                                name="Jason Hughes"
+                                name={user?.username}
                                 size="sm"
-                                src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                                src={user?.avatar}
                             />
                         </DropdownTrigger>
                         <DropdownMenu aria-label="Profile Actions" variant="flat">
                             <DropdownItem key="profile" className="h-14 gap-2">
                                 <p className="font-semibold">Signed in as</p>
-                                <p className="font-semibold">zoey@example.com</p>
+                                <p className="font-semibold">{user?.email}</p>
                             </DropdownItem>
                             <DropdownItem key="switch_appearance" onClick={() => setDarkMode(!darkMode)}>Switch Appearance</DropdownItem>
                             <DropdownItem key="settings">My Settings</DropdownItem>
@@ -121,19 +129,23 @@ export default function Appbar({darkMode, setDarkMode}: PropType) {
                 </NavbarContent>
 
                 <NavbarMenu>
-                    {menuItems.map((item, index) => (
-                        <NavbarMenuItem key={`${index}`}>
-                            <Link
-                                color="foreground"
-                                className="w-full"
-                                as={RouterLink}
-                                to={item.href}
-                                size="lg"
-                            >
-                                {item.label}
-                            </Link>
-                        </NavbarMenuItem>
-                    ))}
+                    {menuItems.map((item, index) => {
+                        if (item.label !== "Create") {
+                            return (
+                                <NavbarMenuItem key={`${index}`}>
+                                    <Link color="foreground" as={RouterLink} to={item.href}>
+                                        {item.label}
+                                    </Link>
+                                </NavbarMenuItem>
+                            )
+                        } else {
+                            return (
+                                <NavbarMenuItem key={`${index}`}>
+                                    <CreateEditThread />
+                                </NavbarMenuItem>
+                            )
+                        }
+                    })}
                 </NavbarMenu>
             </Navbar>
         </>

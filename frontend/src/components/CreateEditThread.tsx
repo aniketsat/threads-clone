@@ -33,8 +33,8 @@ export default function CreateEditThread() {
 
     return (
         <>
-            <Button variant="light" onPress={onOpen}>Create</Button>
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+            <p onClick={onOpen} className="cursor-pointer">Create</p>
+            <Modal placement="center" isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
                     {(onClose) => (
                         <>

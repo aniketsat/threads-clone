@@ -19,11 +19,12 @@ const baseQuery = fetchBaseQuery({
 // @ts-expect-error
 const baseQueryWithRefresh = async (args, api, extraOptions) => {
     let result = await baseQuery(args, api, extraOptions);
+    console.log(result);
     if(result?.error?.status === "FETCH_ERROR") {
         toast.error("Network Error");
-        return result;
     }
     if (result?.error?.status === 403) {
+        console.log(result);
         // send a post request to /users/refresh-token using the refresh token as the body
         const refreshResult = await baseQuery(
             {
@@ -36,6 +37,7 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
             api,
             extraOptions
         );
+        console.log(refreshResult);
         if (refreshResult?.data) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-expect-error
@@ -43,19 +45,17 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
             api.dispatch(setAccessToken(accessToken));
             api.dispatch(setRefreshToken(refreshToken));
             result = await baseQuery(args, api, extraOptions);
-            return result;
-        } else {
-            api.dispatch(logout());
-            return result;
+            console.log(result);
         }
-    } else {
+    } else if (result?.error?.status === 401) {
+        console.log(result);
         api.dispatch(logout());
-        return result;
     }
+    return result;
 }
 
 export const apiSlice = createApi({
     baseQuery: baseQueryWithRefresh,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    endpoints: build => ({})
+    endpoints: _build => ({})
 });

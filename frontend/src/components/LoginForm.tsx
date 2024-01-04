@@ -37,7 +37,7 @@ function LoginForm({setSelected}: PropType) {
                 navigate("/");
             })
             .catch((err) => {
-                toast.error(err.data.message || "Something went wrong");
+                toast.error(err?.data?.message || "Something went wrong");
             });
     };
 
