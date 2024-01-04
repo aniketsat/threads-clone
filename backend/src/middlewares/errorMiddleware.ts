@@ -16,8 +16,6 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
   } else if (err.name === 'TokenExpiredError') {
       statusCode = 403;
       message = 'Token expired';
-  } else {
-      message = 'Something went wrong';
   }
 
   res.status(statusCode).json({

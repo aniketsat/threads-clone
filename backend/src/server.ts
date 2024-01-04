@@ -1,8 +1,10 @@
 import express, {Application} from 'express';
 import { PORT } from "./config/secrets";
 import { errorHandler, notFound } from "./middlewares/errorMiddleware";
+import cors from 'cors';
 
 import authRouter from './routes/auth';
+import userRouter from './routes/user';
 
 class Server {
     private app: Application;
@@ -10,7 +12,7 @@ class Server {
 
     // Routes
     private readonly authRoute = '/api/auth';
-    // private readonly userRoute = '/api/user';
+    private readonly userRoute = '/api/user';
 
     constructor() {
         this.app = express();
@@ -18,6 +20,7 @@ class Server {
     }
 
     basicMiddleware() {
+        this.app.use(cors());
         this.app.use(express.json());
         this.app.use(express.urlencoded({extended: true}));
     }
@@ -29,6 +32,7 @@ class Server {
 
     routes() {
         this.app.use(this.authRoute, authRouter);
+        this.app.use(this.userRoute, userRouter);
     }
 
     start() {
