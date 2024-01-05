@@ -103,7 +103,10 @@ export default function EditProfileModal() {
                                     }}
                                 />
                                 <Image
-                                    src={avatar ? URL.createObjectURL(avatar) : user.avatar}
+                                    src={avatar && typeof avatar === "string" ? avatar :
+                                        avatar && typeof avatar === "object" ? URL.createObjectURL(avatar) :
+                                            user.avatar
+                                    }
                                     width={120}
                                     height={120}
                                     className="bg-cover bg-center"

@@ -3,7 +3,7 @@ import { setAccessToken, setRefreshToken, logout } from "../features/userSlice.t
 import {toast} from "react-toastify";
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: 'http://localhost:8000/api',
+    baseUrl: 'https://threads-34iq.onrender.com/api',
     prepareHeaders: (headers, {getState}) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error

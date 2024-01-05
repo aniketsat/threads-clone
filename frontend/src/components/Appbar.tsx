@@ -60,7 +60,7 @@ export default function Appbar({darkMode, setDarkMode}: PropType) {
         },
         {
             label: "Profile",
-            href: `@${user.username}`
+            href: `@${user?.username}`
         },
     ];
 
@@ -115,12 +115,14 @@ export default function Appbar({darkMode, setDarkMode}: PropType) {
                             />
                         </DropdownTrigger>
                         <DropdownMenu aria-label="Profile Actions" variant="flat">
-                            <DropdownItem key="profile" className="h-14 gap-2">
+                            <DropdownItem key="profile" className="h-14 gap-2" onClick={() => {
+                                navigate(`/@${user?.username}`);
+                            }}>
                                 <p className="font-semibold">Signed in as</p>
                                 <p className="font-semibold">{user?.email}</p>
                             </DropdownItem>
                             <DropdownItem key="switch_appearance" onClick={() => setDarkMode(!darkMode)}>Switch Appearance</DropdownItem>
-                            <DropdownItem key="settings">My Settings</DropdownItem>
+                            <DropdownItem key="settings" onClick={() => navigate('/settings')}>My Settings</DropdownItem>
                             <DropdownItem key="logout" color="danger" onClick={handleLogout}>
                                 Log Out
                             </DropdownItem>

@@ -22,12 +22,13 @@ function PrivateRoutes() {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const {data} = useGetCurrentUserQuery();
+    const {data, refetch} = useGetCurrentUserQuery();
     // eslint-disable-next-line react-hooks/rules-of-hooks
     React.useEffect(() => {
         console.log(data);
-        if (data) {
+        if (isLoggedIn && data?.user) {
             dispatch(setUser(data?.user));
+            refetch();
         }
     }, [data, dispatch]);
 

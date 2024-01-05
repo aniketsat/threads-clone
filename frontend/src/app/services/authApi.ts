@@ -11,7 +11,9 @@ const authApi = apiSlice.injectEndpoints({
                     email,
                     password
                 }
-            })
+            }),
+            // @ts-ignore
+            invalidatesTags: ['User', "Profile", "Follow"]
         }),
         login: builder.mutation({
             query: ({ email, password }) => ({
@@ -21,7 +23,9 @@ const authApi = apiSlice.injectEndpoints({
                     email,
                     password
                 }
-            })
+            }),
+            // @ts-ignore
+            invalidatesTags: ['User', "Profile", "Follow"]
         }),
         refreshToken: builder.mutation({
             query: ({ refreshToken }) => ({
@@ -30,13 +34,17 @@ const authApi = apiSlice.injectEndpoints({
                 body: {
                     refreshToken
                 }
-            })
+            }),
+            // @ts-ignore
+            invalidatesTags: ['User', "Profile", "Follow"]
         }),
         logout: builder.mutation({
             query: () => ({
                 url: '/auth/logout',
                 method: 'POST'
-            })
+            }),
+            // @ts-ignore
+            invalidatesTags: ['User', "Profile", "Follow"]
         })
     })
 });
