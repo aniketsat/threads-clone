@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import bcrypt from "bcryptjs";
 import {PrismaClient} from "@prisma/client";
 
 
@@ -50,6 +51,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             username: currentUser.Profile?.username,
             avatar: currentUser.Profile?.avatar,
             bio: currentUser.Profile?.bio,
+            profileType: currentUser.Profile?.profileType,
             followers: followers.map(follower => follower.Follower?.id),
             following: following.map(following => following.Following?.id),
         }
@@ -195,10 +197,103 @@ const getUserByUsername = asyncHandler(async (req, res) => {
     });
 });
 
+const updatePassword = asyncHandler(async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+        res.status(400);
+        throw new Error('Old password and new password are required');
+    }
+
+    // @ts-ignore
+    const user = req.user;
+
+    // Get user
+    const currentUser = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        }
+    });
+
+    // Check if old password is correct
+    // @ts-ignore
+    const isMatch = await bcrypt.compare(oldPassword, currentUser?.password);
+    if (!isMatch) {
+        res.status(400);
+        throw new Error('Old password is incorrect');
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update user
+    const updatedUser = await prisma.user.update({
+        where: {
+            id: user.id
+        },
+        data: {
+            password: hashedPassword
+        }
+    });
+
+    res.status(200).json({
+        message: 'Update password successful',
+        user: {
+            id: updatedUser.id,
+            email: updatedUser.email,
+            name: updatedUser.name,
+        }
+    });
+});
+
+const changeProfileType = asyncHandler(async (req, res) => {
+    // @ts-ignore
+    const user = req.user;
+
+    // Get user
+    const currentUser = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        }
+    });
+    if (!currentUser) {
+        res.status(400);
+        throw new Error('User does not exist');
+    }
+
+    // Get user profile
+    const profile = await prisma.profile.findUnique({
+        where: {
+            UserId: user.id
+        }
+    });
+    if (!profile) {
+        res.status(400);
+        throw new Error('Profile does not exist');
+    }
+
+    // Update user profile
+    const updatedProfile = await prisma.profile.update({
+        where: {
+            id: profile.id
+        },
+        data: {
+            profileType: profile.profileType === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC'
+        }
+    });
+
+    res.status(200).json({
+        message: `Your profile is now ${updatedProfile.profileType.toLowerCase()}`,
+        profileType: updatedProfile.profileType
+    });
+});
+
 
 export {
     getCurrentUser,
     updateCurrentUser,
     deleteCurrentUser,
-    getUserByUsername
+    getUserByUsername,
+    updatePassword,
+    changeProfileType
 }

@@ -1,5 +1,5 @@
 import express from "express";
-import { getCurrentUser, updateCurrentUser, deleteCurrentUser, getUserByUsername } from "../controllers/user";
+import { getCurrentUser, updateCurrentUser, deleteCurrentUser, getUserByUsername, updatePassword, changeProfileType } from "../controllers/user";
 import { protect } from "../middlewares/authMiddleware";
 import {avatarParser} from "../middlewares/uploadMiddleware";
 
@@ -25,5 +25,15 @@ router.delete('/', protect, deleteCurrentUser);
 // @route   GET /api/user/:username
 // @access  Public
 router.get('/:username', getUserByUsername);
+
+// @desc    Update user password
+// @route   PUT /api/user/password
+// @access  Private
+router.put('/password', protect, updatePassword);
+
+// @desc    Change profile type
+// @route   PUT /api/user/type
+// @access  Private
+router.put('/type', protect, changeProfileType);
 
 export default router;
