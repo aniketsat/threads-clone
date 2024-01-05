@@ -21,6 +21,26 @@ const getCurrentUser = asyncHandler(async (req, res) => {
         throw new Error('User does not exist');
     }
 
+    // Get the array of followers and following
+    const followers = await prisma.follow.findMany({
+        where: {
+            FollowingId: currentUser.Profile?.id
+        },
+        include: {
+            Follower: true
+        }
+    });
+    const following = await prisma.follow.findMany({
+        where: {
+            FollowerId: currentUser.Profile?.id
+        },
+        include: {
+            Following: true
+        }
+    });
+
+    console.log(followers, following);
+
     res.status(200).json({
         message: 'Get user successful',
         user: {
@@ -30,6 +50,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             username: currentUser.Profile?.username,
             avatar: currentUser.Profile?.avatar,
             bio: currentUser.Profile?.bio,
+            followers: followers.map(follower => follower.Follower?.id),
+            following: following.map(following => following.Following?.id),
         }
     });
 });
@@ -148,9 +170,28 @@ const getUserByUsername = asyncHandler(async (req, res) => {
     }
     // exclude password
     const {password, ...rest} = user;
+
+    // Get the number of followers and following
+    const followersCount = await prisma.follow.count({
+        where: {
+            FollowingId: user.Profile?.id
+        }
+    });
+    const followingCount = await prisma.follow.count({
+        where: {
+            FollowerId: user.Profile?.id
+        }
+    });
+
+    const updatedUser = {
+        ...rest,
+        followersCount,
+        followingCount
+    };
+
     res.status(200).json({
         message: 'Get user successful',
-        user: rest
+        user: updatedUser
     });
 });
 

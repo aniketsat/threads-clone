@@ -22,7 +22,7 @@ const register = asyncHandler(async (req, res) => {
     });
     if (userExists) {
         res.status(400);
-        throw new Error('User already exists');
+        throw new Error('Email already exists');
     }
 
     const username = generateUsername(email);

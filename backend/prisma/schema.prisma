@@ -35,4 +35,19 @@ model Profile {
 
   User   User   @relation(fields: [UserId], references: [id])
   UserId String @unique @db.ObjectId
+
+  Followers  Follow[] @relation("Follower")
+  Followings Follow[] @relation("Following")
+}
+
+model Follow {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Follower   Profile @relation("Follower", fields: [FollowerId], references: [id])
+  FollowerId String  @db.ObjectId
+
+  Following   Profile @relation("Following", fields: [FollowingId], references: [id])
+  FollowingId String  @db.ObjectId
 }
