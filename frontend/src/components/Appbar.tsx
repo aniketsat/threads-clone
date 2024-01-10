@@ -7,6 +7,7 @@ import {logout} from "../app/features/userSlice.ts";
 import {useLogoutMutation} from "../app/services/authApi.ts";
 import Loader from "./Loader.tsx";
 import {toast} from "react-toastify";
+import {useDisclosure} from "@nextui-org/react";
 
 
 type PropType = {
@@ -15,6 +16,8 @@ type PropType = {
 };
 
 export default function Appbar({darkMode, setDarkMode}: PropType) {
+    const {isOpen:isCreateEditThreadModalOpen, onOpen: onCreateEditThreadModalOpen, onOpenChange: onCreateEditThreadModalOpenChange} = useDisclosure();
+
     const dispatch = useDispatch();
     
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -92,8 +95,17 @@ export default function Appbar({darkMode, setDarkMode}: PropType) {
                                 )
                             } else {
                                 return (
-                                    <NavbarItem key={`${index}`}>
-                                        <CreateEditThread />
+                                    <NavbarItem
+                                        key={`${index}`}
+                                        className="cursor-pointer"
+                                        onClick={() => onCreateEditThreadModalOpen()}
+                                    >
+                                        Create
+                                        <CreateEditThread
+                                            isOpen={isCreateEditThreadModalOpen}
+                                            onOpen={onCreateEditThreadModalOpen}
+                                            onOpenChange={onCreateEditThreadModalOpenChange}
+                                        />
                                     </NavbarItem>
                                 )
                             }
@@ -142,8 +154,17 @@ export default function Appbar({darkMode, setDarkMode}: PropType) {
                             )
                         } else {
                             return (
-                                <NavbarMenuItem key={`${index}`}>
-                                    <CreateEditThread />
+                                <NavbarMenuItem
+                                    key={`${index}`}
+                                    className="cursor-pointer"
+                                    onClick={() => onCreateEditThreadModalOpen()}
+                                >
+                                    Create
+                                    <CreateEditThread
+                                        isOpen={isCreateEditThreadModalOpen}
+                                        onOpen={onCreateEditThreadModalOpen}
+                                        onOpenChange={onCreateEditThreadModalOpenChange}
+                                    />
                                 </NavbarMenuItem>
                             )
                         }

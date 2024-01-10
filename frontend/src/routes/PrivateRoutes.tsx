@@ -25,7 +25,6 @@ function PrivateRoutes() {
     const {data, refetch} = useGetCurrentUserQuery();
     // eslint-disable-next-line react-hooks/rules-of-hooks
     React.useEffect(() => {
-        console.log(data);
         if (isLoggedIn && data?.user) {
             dispatch(setUser(data?.user));
             refetch();

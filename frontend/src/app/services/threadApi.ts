@@ -1,0 +1,37 @@
+import { apiSlice } from "./apiSlice.ts";
+
+
+export const threadApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    createThread: builder.mutation({
+        query: (formdata) => ({
+            url: `/thread`,
+            method: "POST",
+            body: formdata,
+        }),
+    }),
+    getAllThreads: builder.query({
+        query: ( page ) => {
+            return `/thread?page=${page}`;
+        },
+    }),
+      getThread: builder.query({
+            query: (id) => `/thread/${id}`,
+        }),
+      updateThread: builder.mutation({
+            query: (thread) => ({
+                url: `/thread/${thread.id}`,
+                method: "PUT",
+                body: thread.data
+            }),
+        }),
+      deleteThread: builder.mutation({
+            query: (id) => ({
+                url: `/thread/${id}`,
+                method: "DELETE",
+            }),
+        }),
+  }),
+});
+
+export const { useCreateThreadMutation, useGetAllThreadsQuery, useGetThreadQuery, useUpdateThreadMutation, useDeleteThreadMutation } = threadApi;

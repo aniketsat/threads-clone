@@ -22,7 +22,7 @@ const userApi = apiSlice.injectEndpoints({
         }),
         deleteCurrentUser: builder.mutation({
             query: () => ({
-                url: '/user/me',
+                url: '/user',
                 method: 'DELETE'
             }),
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment

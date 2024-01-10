@@ -3,7 +3,7 @@ import { setAccessToken, setRefreshToken, logout } from "../features/userSlice.t
 import {toast} from "react-toastify";
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: 'https://threads-34iq.onrender.com/api',
+    baseUrl: 'http://localhost:8000/api',
     prepareHeaders: (headers, {getState}) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
@@ -19,13 +19,10 @@ const baseQuery = fetchBaseQuery({
 // @ts-expect-error
 const baseQueryWithRefresh = async (args, api, extraOptions) => {
     let result = await baseQuery(args, api, extraOptions);
-    console.log(result);
     if(result?.error?.status === "FETCH_ERROR") {
         toast.error("Network Error");
     }
     if (result?.error?.status === 403) {
-        console.log(result);
-        // send a post request to /users/refresh-token using the refresh token as the body
         const refreshResult = await baseQuery(
             {
                 url: '/auth/refresh-token',
@@ -37,7 +34,6 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
             api,
             extraOptions
         );
-        console.log(refreshResult);
         if (refreshResult?.data) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-expect-error
@@ -45,10 +41,8 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
             api.dispatch(setAccessToken(accessToken));
             api.dispatch(setRefreshToken(refreshToken));
             result = await baseQuery(args, api, extraOptions);
-            console.log(result);
         }
     } else if (result?.error?.status === 401) {
-        console.log(result);
         api.dispatch(logout());
     }
     return result;

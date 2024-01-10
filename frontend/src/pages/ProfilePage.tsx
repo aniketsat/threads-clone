@@ -68,7 +68,7 @@ function ProfilePage() {
                     toast.success(res?.message);
                     dispatch(setUser({
                         ...user,
-                        following: [...user?.following, data?.user?.Profile?.id],
+                        following: [...user.following, data?.user?.Profile?.id],
                     }));
                     refetch();
                 })

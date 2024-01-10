@@ -1,11 +1,11 @@
 import * as React from "react";
-import {Switch, cn, Button, Card, CardBody, CardHeader} from "@nextui-org/react";
+import {Switch, cn, Button, Card, CardBody, CardHeader, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure} from "@nextui-org/react";
 import PasswordInput from "../components/PasswordInput";
 import {toast} from "react-toastify";
 import Loader from "../components/Loader.tsx";
 import {useSelector, useDispatch} from "react-redux";
-import {setUser} from "../app/features/userSlice.ts";
-import { useUpdatePasswordMutation, useChangeProfileTypeMutation } from "../app/services/userApi.ts";
+import {setUser, logout} from "../app/features/userSlice.ts";
+import { useDeleteCurrentUserMutation, useUpdatePasswordMutation, useChangeProfileTypeMutation } from "../app/services/userApi.ts";
 
 function SettingsPage() {
     const dispatch = useDispatch();
@@ -130,12 +130,70 @@ function SettingsPage() {
                     </Card>
                 </div>
 
-                <Button color="danger" className="w-full">
-                    Delete Account
-                </Button>
+                <DeleteAccountModal />
             </div>
         </>
     );
 }
+
+
+
+function DeleteAccountModal() {
+    const {isOpen, onOpen, onOpenChange} = useDisclosure();
+
+    const dispatch = useDispatch();
+
+    const [deleteCurrentUser, { isLoading: isDeleteCurrentUserLoading }] = useDeleteCurrentUserMutation();
+
+    return (
+        <>
+            {(isDeleteCurrentUserLoading) && <Loader/>}
+            <Button onPress={onOpen} color="danger" className="w-full mb-8" style={{marginBottom:"2rem"}}>
+                Delete Account
+            </Button>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">
+                                Delete Account
+                            </ModalHeader>
+                            <ModalBody>
+                                <p className="text-default-400 text-center">
+                                    Are you sure you want to delete your account?
+                                </p>
+                                <p className={cn("text-default-400 text-center", "text-tiny")}>
+                                    Deleting your account will remove all your posts and comments. This action cannot be undone.
+                                </p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" onPress={
+                                    () => {
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-expect-error
+                                        deleteCurrentUser()
+                                            .unwrap()
+                                            .then((res) => {
+                                                toast.success(res?.message || "Account deleted successfully!");
+                                                dispatch(logout());
+                                                onClose();
+                                            })
+                                            .catch((err) => {
+                                                console.log(err);
+                                                toast.error(err?.data?.message || "Something went wrong!");
+                                            });
+                                    }
+                                }>
+                                    Delete
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+        </>
+    );
+}
+
 
 export default SettingsPage;

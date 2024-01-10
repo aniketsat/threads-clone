@@ -31,10 +31,18 @@ export default function EditProfileModal() {
     const [avatar, setAvatar] = React.useState(user?.avatar);
 
     const handleUpdateProfile = (onClose: { (): void; (): void; }) => {
+        if (!username) {
+            toast.error("Username is required");
+            return;
+        }
         const formDat = new FormData();
         formDat.append("username", username);
-        formDat.append("bio", bio);
-        formDat.append("avatar", avatar);
+        if (bio) {
+            formDat.append("bio", bio);
+        }
+        if (typeof avatar === "object") {
+            formDat.append("avatar", avatar);
+        }
         updateCurrentUserMutation(formDat).unwrap()
             .then((res) => {
                 toast.success(res.message);
@@ -94,6 +102,7 @@ export default function EditProfileModal() {
                                 </Button>
                                 <input
                                     type="file"
+                                    accept="image/*"
                                     id="avatar"
                                     className="hidden"
                                     onChange={(e) => {
