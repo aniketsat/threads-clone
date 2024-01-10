@@ -40,7 +40,15 @@ const getCurrentUser = asyncHandler(async (req, res) => {
         }
     });
 
-    console.log(followers, following);
+    // Get the ids of the threads that the profile has created
+    const threadIds = await prisma.thread.findMany({
+        where: {
+            CreatorId: currentUser.Profile?.id
+        },
+        select: {
+            id: true
+        }
+    });
 
     res.status(200).json({
         message: 'Get user successful',
@@ -54,6 +62,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             profileType: currentUser.Profile?.profileType,
             followers: followers.map(follower => follower.Follower?.id),
             following: following.map(following => following.Following?.id),
+            CreatedThreads: threadIds.map(thread => thread.id)
         }
     });
 });
@@ -63,9 +72,9 @@ const updateCurrentUser = asyncHandler(async (req, res) => {
     const user = req.user;
 
     const { username, bio } = req.body;
-    if (!username || !bio) {
+    if (!username) {
         res.status(400);
-        throw new Error('Username and bio are required');
+        throw new Error('Username is required');
     }
 
     const avatar = req.file;
@@ -98,44 +107,64 @@ const updateCurrentUser = asyncHandler(async (req, res) => {
     // Update user profile
     const updatedProfile = await prisma.profile.update({
         where: {
-            id: currentUser?.Profile?.id
+            id: currentUser.Profile?.id
         },
         data: {
-            username,
-            bio,
+            username: username,
+            bio: bio || '',
             avatar: avatar?.path
-        }
-    });
-
-    // Update user
-    const updatedUser = await prisma.user.update({
-        where: {
-            id: user.id
-        },
-        data: {
-            Profile: {
-                connect: {
-                    id: updatedProfile.id
-                }
-            }
         }
     });
 
     res.status(200).json({
         message: 'Update user successful',
         user: {
-            id: updatedUser.id,
-            email: updatedUser.email,
-            name: updatedUser.name,
-            username: updatedProfile.username,
-            avatar: updatedProfile.avatar,
-            bio: updatedProfile.bio,
+            id: currentUser.id,
+            email: currentUser.email,
+            name: currentUser.name,
+            username: updatedProfile?.username,
+            avatar: updatedProfile?.avatar,
+            bio: updatedProfile?.bio,
+            profileType: updatedProfile?.profileType
         }
     });
 });
 
 const deleteCurrentUser = asyncHandler(async (req, res) => {
-    res.send('success')
+    // @ts-ignore
+    const user = req.user;
+
+    // Get user
+    const currentUser = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        include: {
+            Profile: true
+        }
+    });
+    if (!currentUser) {
+        res.status(400);
+        throw new Error('User does not exist');
+    }
+
+    // Delete profile
+    await prisma.profile.delete({
+        where: {
+            id: currentUser.Profile?.id
+        }
+    });
+
+    // Delete user
+    await prisma.user.delete({
+        where: {
+            id: user.id
+        }
+    });
+
+    res.status(200).json({
+        message: 'Delete user successful'
+    });
 });
 
 const getUserByUsername = asyncHandler(async (req, res) => {

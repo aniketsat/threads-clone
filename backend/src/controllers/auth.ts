@@ -1,6 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
-import Prisma, { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import {JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, JWT_ACCESS_EXPIRES_IN, JWT_REFRESH_EXPIRES_IN} from "../config/secrets";
 import { generateToken, verifyToken } from "../utils/token";
 import { generateUsername } from "../utils/user";
@@ -70,7 +70,7 @@ const login = asyncHandler(async (req, res) => {
     });
     if (!user) {
         res.status(400);
-        throw new Error('User does not exist');
+        throw new Error('Email does not exist');
     }
 
     const isMatch = await bcrypt.compare(password, user.password);

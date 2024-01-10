@@ -6,6 +6,7 @@ import cors from 'cors';
 import authRouter from './routes/auth';
 import userRouter from './routes/user';
 import followRouter from "./routes/follow";
+import threadRouter from "./routes/thread";
 
 class Server {
     private app: Application;
@@ -15,6 +16,7 @@ class Server {
     private readonly authRoute = '/api/auth';
     private readonly userRoute = '/api/user';
     private readonly followRoute = '/api/follow';
+    private readonly threadRoute = '/api/thread';
 
     constructor() {
         this.app = express();
@@ -36,6 +38,7 @@ class Server {
         this.app.use(this.authRoute, authRouter);
         this.app.use(this.userRoute, userRouter);
         this.app.use(this.followRoute, followRouter);
+        this.app.use(this.threadRoute, threadRouter);
     }
 
     start() {
