@@ -96,9 +96,6 @@ const getAllThreads = asyncHandler(async (req, res) => {
         throw new Error('User not found');
     }
 
-    // Get limit and offset
-    const page = Number(req.query.page) || 1;
-
     // Get threads that belong to the public profile or the user's profile or the profile to which the user is following
     const threads = await prisma.thread.findMany({
         where: {
@@ -142,41 +139,11 @@ const getAllThreads = asyncHandler(async (req, res) => {
         orderBy: {
             createdAt: 'desc'
         },
-        skip: (page - 1) * 2,
-        take: 2
-    });
-
-    // Get total number of threads
-    const totalThreads = await prisma.thread.count({
-        where: {
-            OR: [
-                {
-                    Creator: {
-                        profileType: 'PUBLIC'
-                    }
-                },
-                {
-                    Creator: {
-                        id: userExists?.Profile?.id
-                    }
-                },
-                {
-                    Creator: {
-                        Followers: {
-                            some: {
-                                id: userExists?.Profile?.id
-                            }
-                        }
-                    }
-                }
-            ],
-            isDeleted: false
-        },
     });
 
     res.status(200).json({
-        count: totalThreads,
-        results: threads
+        message: 'Threads fetched successfully',
+        threads
     });
 });
 

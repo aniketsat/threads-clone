@@ -22,31 +22,15 @@ const getCurrentUser = asyncHandler(async (req, res) => {
         throw new Error('User does not exist');
     }
 
-    // Get the array of followers and following
-    const followers = await prisma.follow.findMany({
+    // Get the profile of the user
+    const profile = await prisma.profile.findUnique({
         where: {
-            FollowingId: currentUser.Profile?.id
+            UserId: user.id
         },
         include: {
-            Follower: true
-        }
-    });
-    const following = await prisma.follow.findMany({
-        where: {
-            FollowerId: currentUser.Profile?.id
-        },
-        include: {
-            Following: true
-        }
-    });
-
-    // Get the ids of the threads that the profile has created
-    const threadIds = await prisma.thread.findMany({
-        where: {
-            CreatorId: currentUser.Profile?.id
-        },
-        select: {
-            id: true
+            Followers: true,
+            Followings: true,
+            Threads: true,
         }
     });
 
@@ -59,10 +43,11 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             username: currentUser.Profile?.username,
             avatar: currentUser.Profile?.avatar,
             bio: currentUser.Profile?.bio,
+            profileId: profile?.id,
             profileType: currentUser.Profile?.profileType,
-            followers: followers.map(follower => follower.Follower?.id),
-            following: following.map(following => following.Following?.id),
-            CreatedThreads: threadIds.map(thread => thread.id)
+            followers: profile?.Followers?.map(follower => follower.id),
+            following: profile?.Followings?.map(following => following.id),
+            CreatedThreads: profile?.Threads?.filter(thread => !thread.isDeleted).map(thread => thread.id),
         }
     });
 });

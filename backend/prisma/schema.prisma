@@ -46,6 +46,8 @@ model Profile {
   Likes Like[]
 
   Quotes Thread[] @relation("Quote")
+
+  Bookmarks Bookmark[]
 }
 
 model Follow {
@@ -84,9 +86,23 @@ model Thread {
   RepostTo   Thread?  @relation("RepostThread", fields: [RepostToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   RepostToId String?  @db.ObjectId
   RepostFrom Thread[] @relation("RepostThread")
+
+  Bookmarks Bookmark[]
 }
 
 model Like {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Thread   Thread @relation(fields: [ThreadId], references: [id])
+  ThreadId String @db.ObjectId
+
+  Profile   Profile @relation(fields: [ProfileId], references: [id])
+  ProfileId String  @db.ObjectId
+}
+
+model Bookmark {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
