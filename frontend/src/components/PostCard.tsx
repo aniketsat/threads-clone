@@ -20,15 +20,64 @@ import { AiOutlineHeart } from "react-icons/ai";
 import { useSelector } from "react-redux";
 import CreateEditThread from "./CreateEditThread.tsx";
 import DeleteThreadModal from "./DeleteThreadModal.tsx";
+import {useLikePostMutation, useUnlikePostMutation} from "../app/services/likeApi.ts";
+import Loader from "./Loader.tsx";
 
 type PropType = {
     child: React.ReactNode;
     thread?: ThreadType;
+    allThreads: ThreadType[];
+    setAllThreads: React.Dispatch<React.SetStateAction<ThreadType[]>>;
     isChild?: boolean;
 };
-function PostCard( { child, thread, isChild }:PropType) {
+function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropType) {
     const {isOpen:isCreateEditThreadModalOpen, onOpen: onCreateEditThreadModalOpen, onOpenChange: onCreateEditThreadModalOpenChange} = useDisclosure();
     const {isOpen:isDeleteThreadModalOpen, onOpen: onDeleteThreadModalOpen, onOpenChange: onDeleteThreadModalOpenChange} = useDisclosure();
+
+    const [likePost, { isLoading: isLikeLoading }] = useLikePostMutation();
+    const [unlikePost, { isLoading: isUnlikeLoading }] = useUnlikePostMutation();
+
+    const handleLike = () => {
+        likePost(thread?.id as string)
+            .unwrap()
+            .then((data) => {
+                console.log(data);
+                const index = allThreads.findIndex((thread) => thread.id === data?.like?.ThreadId);
+                const updatedThread = {
+                    ...allThreads[index],
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    Likes: [...allThreads[index].Likes, data?.like],
+                };
+                const updatedThreads = [...allThreads];
+                updatedThreads[index] = updatedThread;
+                setAllThreads(updatedThreads);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+
+    const handleUnlike = () => {
+        unlikePost(thread?.id as string)
+            .unwrap()
+            .then((data) => {
+                console.log(data);
+                const index = allThreads.findIndex((thread) => thread.id === data?.like?.ThreadId);
+                const updatedThread = {
+                    ...allThreads[index],
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    Likes: allThreads[index].Likes.filter((like) => like.id !== data?.like?.id),
+                };
+                const updatedThreads = [...allThreads];
+                updatedThreads[index] = updatedThread;
+                setAllThreads(updatedThreads);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
@@ -36,6 +85,7 @@ function PostCard( { child, thread, isChild }:PropType) {
 
     return (
         <>
+            {(isLikeLoading || isUnlikeLoading) && <Loader />}
             <div className="p-2" style={{border: "1px solid #eaeaea", borderRadius: "8px", marginTop: 0, width:"100%"}}>
                 {
                     isChild && (
@@ -154,8 +204,13 @@ function PostCard( { child, thread, isChild }:PropType) {
                     isChild ? null : (
                         <div className="flex flex-row justify-between mt-2">
                             <div className="flex flex-row items-center justify-center">
-                                <AiFillHeart className="text-2xl text-gray-500 cursor-pointer icon"/>
-                                <AiOutlineHeart className="text-2xl text-gray-500 cursor-pointer ml-2 icon"/>
+                                {
+                                    thread?.Likes?.find((like) => like.ProfileId === user?.profileId) ? (
+                                        <AiFillHeart className="text-2xl text-red-500 cursor-pointer ml-2 icon" onClick={handleUnlike}/>
+                                    ) : (
+                                        <AiOutlineHeart className="text-2xl text-gray-500 cursor-pointer ml-2 icon" onClick={handleLike}/>
+                                    )
+                                }
                                 <FaRegComment className="text-2xl text-gray-500 cursor-pointer ml-2 icon"/>
                                 <AiOutlineShareAlt className="text-2xl text-gray-500 cursor-pointer ml-2 icon"/>
                             </div>

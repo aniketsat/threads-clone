@@ -11,8 +11,8 @@ export const threadApi = apiSlice.injectEndpoints({
         }),
     }),
     getAllThreads: builder.query({
-        query: ( page ) => {
-            return `/thread?page=${page}`;
+        query: () => {
+            return `/thread`;
         },
     }),
       getThread: builder.query({

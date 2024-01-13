@@ -29,7 +29,7 @@ function DeleteThreadModal({isOpen, onOpen, onOpenChange, thread}: CreateEditThr
                 toast.success(res.message);
                 dispatch(setUser({
                     ...user,
-                    threads: user?.CreatedThreads?.filter((t: { id: string | number; }) => t.id !== thread.id),
+                    CreatedThreads: user?.CreatedThreads?.filter((t: { id: string | number; }) => t.id !== thread.id),
                 }));
                 onClose();
             })

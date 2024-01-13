@@ -14,6 +14,8 @@ type ThreadType = {
     };
     Likes?: {
         id: string;
+        ProfileId: string;
+        ThreadId: string;
     }[];
     ChildThreads?: ThreadType[];
 }

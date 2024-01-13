@@ -25,11 +25,17 @@ function PrivateRoutes() {
     const {data, refetch} = useGetCurrentUserQuery();
     // eslint-disable-next-line react-hooks/rules-of-hooks
     React.useEffect(() => {
+        const reload = async () => {
+            await refetch();
+        }
         if (isLoggedIn && data?.user) {
             dispatch(setUser(data?.user));
-            refetch();
+            reload();
         }
-    }, [data, dispatch]);
+        return () => {
+            console.log("PrivateRoutes.tsx: useEffect cleanup");
+        }
+    }, [data, dispatch, isLoggedIn, refetch]);
 
 
     return (

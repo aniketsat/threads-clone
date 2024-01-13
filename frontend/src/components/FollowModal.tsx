@@ -22,7 +22,8 @@ export default function FollowModal({username}: {username: string}) {
 
     const dispatch = useDispatch();
 
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     const user = useSelector((state) => state.user.user);
 
     const {data: followersData, isLoading: followersLoading, refetch: refetchFollowers} = useGetFollowersByUsernameQuery(username);
@@ -63,7 +64,7 @@ export default function FollowModal({username}: {username: string}) {
                     toast.success(res?.message);
                     dispatch(setUser({
                         ...user,
-                        following: [...user?.following, id],
+                        following: [...user.following, id],
                     }));
                     refetchFollowers();
                     refetchFollowings();
@@ -101,7 +102,9 @@ export default function FollowModal({username}: {username: string}) {
                                             emptyContent="No followers yet"
                                         >
                                             {
-                                                followersData?.followers?.map((follower: { id: string; avatar: string | undefined; username: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined; UserId: any; name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }) => (
+                                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                // @ts-expect-error
+                                                followersData?.followers?.map((follower) => (
                                                     <ListboxItem
                                                         key={follower?.id}
                                                         isReadOnly={false}
@@ -147,7 +150,9 @@ export default function FollowModal({username}: {username: string}) {
                                             emptyContent="You are not following anyone"
                                         >
                                             {
-                                                followingData?.following?.map((folloee: { id: string; avatar: string | undefined; username: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined; UserId: any; name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }) => (
+                                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                // @ts-expect-error
+                                                followingData?.following?.map((folloee) => (
                                                     <ListboxItem
                                                         key={folloee?.id}
                                                         isReadOnly={false}
