@@ -5,7 +5,7 @@ import {PrismaClient} from "@prisma/client";
 const prisma = new PrismaClient();
 
 const createThread = asyncHandler(async (req, res) => {
-    const { content, parentThreadId } = req.body;
+    const { content } = req.body;
     const picture = req.file;
 
     // @ts-ignore
@@ -25,52 +25,18 @@ const createThread = asyncHandler(async (req, res) => {
         throw new Error('User not found');
     }
 
-    // Check if parent thread exists
-    let parentThreadExists;
-    if (parentThreadId) {
-        parentThreadExists = await prisma.thread.findUnique({
-            where: {
-                id: parentThreadId
-            }
-        });
-        if (!parentThreadExists) {
-            res.status(404);
-            throw new Error('Parent thread not found');
-        }
-    }
-
     // Create thread
-    let thread;
-    if (parentThreadExists) {
-        thread = await prisma.thread.create({
-            data: {
-                content,
-                picture: picture?.path,
-                ParentThread: {
-                    connect: {
-                        id: parentThreadId
-                    }
-                },
-                Creator: {
-                    connect: {
-                        id: userExists?.Profile?.id
-                    }
+    const thread = await prisma.thread.create({
+        data: {
+            content,
+            picture: picture?.path,
+            Creator: {
+                connect: {
+                    id: userExists?.Profile?.id
                 }
             }
-        });
-    } else {
-        thread = await prisma.thread.create({
-            data: {
-                content,
-                picture: picture?.path,
-                Creator: {
-                    connect: {
-                        id: userExists?.Profile?.id
-                    }
-                }
-            }
-        });
-    }
+        }
+    });
 
     res.status(201).json({
         message: 'Thread created',
@@ -124,15 +90,13 @@ const getAllThreads = asyncHandler(async (req, res) => {
         },
         include: {
             Creator: true,
-            ParentThread: true,
-            ChildThreads: true,
             Likes: true,
+            Comments: true,
             QuotedBy: true,
             RepostTo: {
                 include: {
                     Creator: true,
                     Likes: true,
-                    ChildThreads: true,
                 }
             }
         },
@@ -154,7 +118,6 @@ const getThread = asyncHandler(async (req, res) => {
 const updateThread = asyncHandler(async (req, res) => {
     const { content } = req.body;
     const picture = req.file;
-    console.log(req.file);
 
     // Get thread id
     const threadId = req.params.id;
@@ -230,28 +193,20 @@ const deleteThread = asyncHandler(async (req, res) => {
         where: {
             id: threadId
         },
-        include: {
-            ChildThreads: true
-        }
     });
     if (!threadExists) {
         res.status(404);
         throw new Error('Thread not found');
     }
 
+    // Delete thread
     await prisma.thread.update({
         where: {
             id: threadId
         },
         data: {
-            content: '',
-            picture: '',
             isDeleted: true
         }
-    });
-
-    res.status(200).json({
-        message: 'Thread deleted'
     });
 });
 

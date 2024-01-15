@@ -48,6 +48,8 @@ model Profile {
   Quotes Thread[] @relation("Quote")
 
   Bookmarks Bookmark[]
+
+  Comments Comment[]
 }
 
 model Follow {
@@ -75,10 +77,6 @@ model Thread {
 
   Likes Like[]
 
-  ParentThread   Thread?  @relation("ParentThread", fields: [ParentThreadId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ParentThreadId String?  @db.ObjectId
-  ChildThreads   Thread[] @relation("ParentThread")
-
   QuotedBy   Profile? @relation("Quote", fields: [QuotedById], references: [id])
   QuotedById String?  @db.ObjectId
 
@@ -88,6 +86,8 @@ model Thread {
   RepostFrom Thread[] @relation("RepostThread")
 
   Bookmarks Bookmark[]
+
+  Comments Comment[]
 }
 
 model Like {
@@ -95,8 +95,11 @@ model Like {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Thread   Thread @relation(fields: [ThreadId], references: [id])
-  ThreadId String @db.ObjectId
+  Thread   Thread? @relation(fields: [ThreadId], references: [id])
+  ThreadId String? @db.ObjectId
+
+  Comment   Comment? @relation(fields: [CommentId], references: [id])
+  CommentId String?  @db.ObjectId
 
   Profile   Profile @relation(fields: [ProfileId], references: [id])
   ProfileId String  @db.ObjectId
@@ -112,4 +115,24 @@ model Bookmark {
 
   Profile   Profile @relation(fields: [ProfileId], references: [id])
   ProfileId String  @db.ObjectId
+}
+
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  Thread   Thread @relation(fields: [ThreadId], references: [id])
+  ThreadId String @db.ObjectId
+
+  Profile   Profile @relation(fields: [ProfileId], references: [id])
+  ProfileId String  @db.ObjectId
+
+  Likes Like[]
+
+  Parent   Comment?  @relation("CommentThread", fields: [ParentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ParentId String?   @db.ObjectId
+  Children Comment[] @relation("CommentThread")
 }
