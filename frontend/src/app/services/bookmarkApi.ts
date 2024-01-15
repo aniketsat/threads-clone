@@ -3,9 +3,6 @@ import {apiSlice} from "./apiSlice.ts";
 
 const bookmarkApi = apiSlice.injectEndpoints({
     endpoints: builder => ({
-        getBookmarks: builder.query({
-            query: () => `/bookmark`,
-        }),
         createBookmark: builder.mutation({
             query: (id) => ({
                 url: `/bookmark/${id}`,
@@ -18,13 +15,16 @@ const bookmarkApi = apiSlice.injectEndpoints({
                 method: 'DELETE'
             }),
         }),
+        getBookmarkByUser: builder.query({
+            query: (username) => `/bookmark/user/${username}`,
+        }),
     }),
     overrideExisting: false,
 });
 
 
 export const {
-    useGetBookmarksQuery,
     useCreateBookmarkMutation,
     useDeleteBookmarkMutation,
+    useGetBookmarkByUserQuery
 } = bookmarkApi;

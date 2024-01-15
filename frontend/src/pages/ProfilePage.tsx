@@ -9,6 +9,8 @@ import {setUser} from "../app/features/userSlice.ts";
 import {useFollowUserMutation, useUnfollowUserMutation} from "../app/services/followApi.ts";
 import EditProfileModal from "../components/EditProfileModal.tsx";
 import FollowModal from "../components/FollowModal.tsx";
+import Profile_Posts from "../components/Profile_Posts.tsx";
+import Profile_Bookmarks from "../components/Profile_Bookmarks.tsx";
 
 
 function ProfilePage() {
@@ -152,13 +154,16 @@ function ProfilePage() {
                             color="primary"
                         >
                             <Tab title="Posts">
-                                <p>Posts</p>
+                                <Profile_Posts username={username?.slice(1) || ""} />
                             </Tab>
-                            <Tab title="Replies">
-                                <p>Replies</p>
+                            <Tab title="Quotes">
+                                <p>Quotes</p>
                             </Tab>
-                            <Tab title="Replies">
-                                <p>Replies</p>
+                            <Tab title="Reposts">
+                                <p>Reposts</p>
+                            </Tab>
+                            <Tab title="Bookmarks">
+                                <Profile_Bookmarks username={username?.slice(1) || ""} />
                             </Tab>
                         </Tabs>
                     )

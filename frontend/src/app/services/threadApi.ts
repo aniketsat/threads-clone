@@ -31,7 +31,10 @@ export const threadApi = apiSlice.injectEndpoints({
                 method: "DELETE",
             }),
         }),
+      getThreadsByUser: builder.query({
+            query: (username) => `/thread/user/${username}`,
+        }),
   }),
 });
 
-export const { useCreateThreadMutation, useGetAllThreadsQuery, useGetThreadQuery, useUpdateThreadMutation, useDeleteThreadMutation } = threadApi;
+export const { useCreateThreadMutation, useGetAllThreadsQuery, useGetThreadQuery, useUpdateThreadMutation, useDeleteThreadMutation, useGetThreadsByUserQuery } = threadApi;

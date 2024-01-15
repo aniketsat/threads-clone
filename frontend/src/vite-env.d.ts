@@ -3,6 +3,7 @@ type ThreadType = {
     id: string | number;
     content?: string;
     picture?: string;
+    isDeleted?: boolean;
     RepostTo?: ThreadType;
     createdAt?: string;
     updatedAt?: string;
@@ -21,4 +22,12 @@ type ThreadType = {
         id: string;
     }[];
     ChildThreads?: ThreadType[];
+}
+type BookmarkType = {
+    id: string;
+    ProfileId: string;
+    ThreadId: string;
+    createdAt: string;
+    updatedAt: string;
+    Thread: ThreadType;
 }

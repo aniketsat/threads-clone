@@ -128,7 +128,7 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
     return (
         <>
             {(isLikeLoading || isUnlikeLoading || isCreateBookmarkLoading || isDeleteBookmarkLoading) && <Loader />}
-            <div className="p-2" style={{border: "1px solid #eaeaea", borderRadius: "8px", marginTop: 0, width:"100%"}}>
+            <div className="w-full p-2" style={{border: "1px solid #eaeaea", borderRadius: "8px", marginTop: 0, width:"100%"}}>
                 {
                     isChild && (
                         <p className="text-gray-50 text-xs" style={{
