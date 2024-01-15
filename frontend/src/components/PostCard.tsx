@@ -17,11 +17,14 @@ import { AiOutlineShareAlt } from "react-icons/ai";
 import { BiRepost } from "react-icons/bi";
 import { AiFillHeart } from "react-icons/ai";
 import { AiOutlineHeart } from "react-icons/ai";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "../app/features/userSlice.ts";
 import CreateEditThread from "./CreateEditThread.tsx";
 import DeleteThreadModal from "./DeleteThreadModal.tsx";
 import {useLikePostMutation, useUnlikePostMutation} from "../app/services/likeApi.ts";
+import {useCreateBookmarkMutation, useDeleteBookmarkMutation} from "../app/services/bookmarkApi.ts";
 import Loader from "./Loader.tsx";
+import {toast} from "react-toastify";
 
 type PropType = {
     child: React.ReactNode;
@@ -34,8 +37,13 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
     const {isOpen:isCreateEditThreadModalOpen, onOpen: onCreateEditThreadModalOpen, onOpenChange: onCreateEditThreadModalOpenChange} = useDisclosure();
     const {isOpen:isDeleteThreadModalOpen, onOpen: onDeleteThreadModalOpen, onOpenChange: onDeleteThreadModalOpenChange} = useDisclosure();
 
+    const dispatch = useDispatch();
+
     const [likePost, { isLoading: isLikeLoading }] = useLikePostMutation();
     const [unlikePost, { isLoading: isUnlikeLoading }] = useUnlikePostMutation();
+
+    const [createBookmark, { isLoading: isCreateBookmarkLoading }] = useCreateBookmarkMutation();
+    const [deleteBookmark, { isLoading: isDeleteBookmarkLoading }] = useDeleteBookmarkMutation();
 
     const handleLike = () => {
         likePost(thread?.id as string)
@@ -79,13 +87,47 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
             });
     }
 
+    const handleCreateBookmark = () => {
+        createBookmark(thread?.id as string)
+            .unwrap()
+            .then((data) => {
+                console.log(data);
+                toast.success(data?.message || "Bookmark created successfully");
+                dispatch(setUser({
+                    ...user,
+                    BookmarkedThreads: [...user.BookmarkedThreads, thread?.id],
+                }));
+            })
+            .catch((err) => {
+                console.log(err);
+                toast.error(err?.data?.message || "Something went wrong");
+            });
+    };
+
+    const handleDeleteBookmark = () => {
+        deleteBookmark(thread?.id as string)
+            .unwrap()
+            .then((data) => {
+                console.log(data);
+                toast.success(data?.message || "Bookmark deleted successfully");
+                dispatch(setUser({
+                    ...user,
+                    BookmarkedThreads: user?.BookmarkedThreads?.filter((threadId: string) => threadId !== thread?.id),
+                }));
+            })
+            .catch((err) => {
+                console.log(err);
+                toast.error(err?.data?.message || "Something went wrong");
+            });
+    };
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const user = useSelector((state) => state.user.user);
 
     return (
         <>
-            {(isLikeLoading || isUnlikeLoading) && <Loader />}
+            {(isLikeLoading || isUnlikeLoading || isCreateBookmarkLoading || isDeleteBookmarkLoading) && <Loader />}
             <div className="p-2" style={{border: "1px solid #eaeaea", borderRadius: "8px", marginTop: 0, width:"100%"}}>
                 {
                     isChild && (
@@ -133,7 +175,22 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
                         {
                             user?.id === thread?.Creator?.UserId ? (
                                 <DropdownMenu aria-label="Static Actions">
-                                    <DropdownItem key="bookmark">Bookmark</DropdownItem>
+                                    <DropdownItem
+                                        key="bookmark"
+                                        onClick={() => {
+                                            if (user?.BookmarkedThreads?.includes(thread?.id)) {
+                                                handleDeleteBookmark();
+                                            } else {
+                                                handleCreateBookmark();
+                                            }
+                                        }}
+                                    >{
+                                        user?.BookmarkedThreads?.includes(thread?.id) ? (
+                                            "Unbookmark"
+                                        ) : (
+                                            "Bookmark"
+                                        )
+                                    }</DropdownItem>
                                     <DropdownItem
                                         key="edit"
                                         onClick={() => {
