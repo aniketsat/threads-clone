@@ -9,7 +9,6 @@ import {
     Textarea,
     Image
 } from "@nextui-org/react";
-import { RxCross2 } from "react-icons/rx";
 import Loader from "./Loader.tsx";
 import { useCreateThreadMutation, useUpdateThreadMutation } from "../app/services/threadApi.ts";
 import {toast} from "react-toastify";
@@ -18,12 +17,10 @@ import {useDispatch, useSelector} from "react-redux";
 
 
 type ThreadFormProps = {
-    index: number;
     thread: ThreadType;
     setThreads: React.Dispatch<React.SetStateAction<ThreadType[]>>;
-    toBeUpdatedThread?: ThreadType;
 }
-const ThreadForm = ({ index, thread, setThreads, toBeUpdatedThread }: ThreadFormProps) => {
+const ThreadForm = ({ thread, setThreads }: ThreadFormProps) => {
     const handleContentChange = (value: string) => {
         setThreads((prevThreads) => {
             const allThreads = [...prevThreads];
@@ -33,40 +30,8 @@ const ThreadForm = ({ index, thread, setThreads, toBeUpdatedThread }: ThreadForm
         });
     }
 
-    const handleDeleteThread = () => {
-        setThreads((prevThreads) => {
-            const allThreads = [...prevThreads];
-            const threadIndex = allThreads.findIndex((t) => t.id === thread.id);
-            allThreads.splice(threadIndex, 1);
-            return allThreads;
-        });
-    }
-
     return (
         <>
-            <div className="w-full flex flex-row justify-between">
-                <p className="text-gray-50 text-xs" style={{
-                    fontWeight: 600,
-                    marginTop: "0.25rem",
-                    marginBottom: "0.25rem",
-                }}>Thread {index + 1}</p>
-                <Button
-                    isIconOnly
-                    color="danger"
-                    variant="flat"
-                    onPress={handleDeleteThread}
-                    style={{
-                        width: "fit-content",
-                        display: toBeUpdatedThread ? "none" : "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}
-                >
-                    <RxCross2
-                        fill="currentColor"
-                    />
-                </Button>
-            </div>
             <div className="flex flex-col gap-4">
                 <Textarea
                     isRequired
@@ -172,19 +137,10 @@ export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpda
     // @ts-expect-error
     const user = useSelector((state) => state.user.user);
 
-    const addThread = () => {
-        const allThreads = [...threads];
-        allThreads.push({
-            id: Date.now(),
-        });
-        setThreads(allThreads);
-    }
-
     const [createThread, {isLoading: isCreatingThread}] = useCreateThreadMutation();
     const [updateThread, {isLoading: isUpdatingThread}] = useUpdateThreadMutation();
 
     const handleCreateThread = async (onClose: () => void) => {
-        let parentThread;
         for (let i = 0; i < threads.length; i++) {
             const thread = threads[i];
             const {content, picture} = thread;
@@ -192,9 +148,6 @@ export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpda
             formData.append("content", content || "");
             if (picture) {
                 formData.append("picture", picture);
-            }
-            if (parentThread) {
-                formData.append("parentThreadId", parentThread.id);
             }
             const res = await createThread(formData);
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -206,9 +159,6 @@ export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpda
                     // @ts-expect-error
                     CreatedThreads: [...user.CreatedThreads, res.data.thread.id],
                 }));
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-expect-error
-                parentThread = res?.data?.thread;
             } else {
                 toast.error("Something went wrong");
                 return;
@@ -264,28 +214,26 @@ export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpda
                             <ModalHeader className="flex flex-col gap-1">Create A New Thread</ModalHeader>
                             <ModalBody>
                                 {
-                                    threads.map((thread, index) => {
+                                    threads.map((thread) => {
                                         return (
                                             <ThreadForm
                                                 key={thread.id}
-                                                index={index}
                                                 thread={thread}
                                                 setThreads={setThreads}
-                                                toBeUpdatedThread={toBeUpdatedThread}
                                             />
                                         )
                                     })
                                 }
-                                <Button
-                                    color="secondary"
-                                    variant="flat"
-                                    onPress={addThread}
-                                    style={{
-                                        display: toBeUpdatedThread ? "none" : "block",
-                                    }}
-                                >
-                                    Add Thread
-                                </Button>
+                                {/*<Button*/}
+                                {/*    color="secondary"*/}
+                                {/*    variant="flat"*/}
+                                {/*    onPress={addThread}*/}
+                                {/*    style={{*/}
+                                {/*        display: toBeUpdatedThread ? "none" : "block",*/}
+                                {/*    }}*/}
+                                {/*>*/}
+                                {/*    Add Thread*/}
+                                {/*</Button>*/}
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onClose}>

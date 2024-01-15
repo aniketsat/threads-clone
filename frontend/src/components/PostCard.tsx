@@ -223,7 +223,7 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
 
                 <div className="flex flex-row justify-start mt-2">
                     <p className="text-gray-50 text-xs">{thread?.Likes?.length} likes</p>
-                    <p className="text-gray-50 text-xs ml-2">{thread?.ChildThreads?.length} comments</p>
+                    <p className="text-gray-50 text-xs ml-2">{thread?.Comments?.length} comments</p>
                 </div>
             </div>
         </>

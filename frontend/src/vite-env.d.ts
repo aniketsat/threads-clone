@@ -17,5 +17,8 @@ type ThreadType = {
         ProfileId: string;
         ThreadId: string;
     }[];
+    Comments?: {
+        id: string;
+    }[];
     ChildThreads?: ThreadType[];
 }
