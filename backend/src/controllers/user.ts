@@ -31,6 +31,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             Followers: true,
             Followings: true,
             Threads: true,
+            Bookmarks: true
         }
     });
 
@@ -48,6 +49,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             followers: profile?.Followers?.map(follower => follower.id),
             following: profile?.Followings?.map(following => following.id),
             CreatedThreads: profile?.Threads?.filter(thread => !thread.isDeleted).map(thread => thread.id),
+            BookmarkedThreads: profile?.Bookmarks?.map(bookmark => bookmark.ThreadId)
         }
     });
 });
