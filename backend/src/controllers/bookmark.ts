@@ -113,8 +113,65 @@ const deleteBookmark = asyncHandler(async (req, res) => {
     });
 });
 
+const getBookmarksByUser = asyncHandler(async (req, res) => {
+    const {username} = req.params;
+
+    // @ts-ignore
+    const user = req.user;
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        include: {
+            Profile: true
+        }
+    });
+    if (!userExists) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Check if profile exists
+    const profileExists = await prisma.profile.findUnique({
+        where: {
+            username
+        }
+    });
+    if (!profileExists) {
+        res.status(404);
+        throw new Error('Profile not found');
+    }
+
+    // Get bookmarks
+    const bookmarks = await prisma.bookmark.findMany({
+        where: {
+            ProfileId: profileExists.id as string
+        },
+        include: {
+            Thread: {
+                include: {
+                    Creator: true,
+                    Likes: true,
+                    Comments: true,
+                }
+            }
+        },
+        orderBy: {
+            createdAt: 'desc'
+        },
+    });
+
+    res.status(200).json({
+        message: 'Bookmarks fetched',
+        bookmarks
+    });
+});
+
 
 export {
     createBookmark,
-    deleteBookmark
+    deleteBookmark,
+    getBookmarksByUser
 };

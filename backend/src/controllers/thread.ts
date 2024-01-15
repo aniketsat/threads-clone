@@ -208,6 +208,73 @@ const deleteThread = asyncHandler(async (req, res) => {
             isDeleted: true
         }
     });
+
+    res.status(200).json({
+        message: 'Thread deleted'
+    });
+});
+
+const getThreadsByUser = asyncHandler(async (req, res) => {
+    const { username } = req.params;
+
+    // @ts-ignore
+    const user = req.user;
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        include: {
+            Profile: true
+        }
+    });
+    if (!userExists) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Check if any profile exists with the username
+    const profileExists = await prisma.profile.findUnique({
+        where: {
+            username
+        }
+    });
+    if (!profileExists) {
+        res.status(404);
+        throw new Error('Profile not found');
+    }
+
+    // Get threads by the profile
+    const threads = await prisma.thread.findMany({
+        where: {
+            Creator: {
+                id: profileExists.id
+            },
+            isDeleted: false
+        },
+        include: {
+            Creator: true,
+            Likes: true,
+            Comments: true,
+            QuotedBy: true,
+            RepostTo: {
+                include: {
+                    Creator: true,
+                    Likes: true,
+                    Comments: true,
+                }
+            }
+        },
+        orderBy: {
+            createdAt: 'desc'
+        },
+    });
+
+    res.status(200).json({
+        message: 'Threads fetched successfully',
+        threads
+    });
 });
 
 
@@ -216,5 +283,6 @@ export {
     getAllThreads,
     getThread,
     updateThread,
-    deleteThread
+    deleteThread,
+    getThreadsByUser
 }
