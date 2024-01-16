@@ -10,6 +10,7 @@ import {
     Image
 } from "@nextui-org/react";
 import Loader from "./Loader.tsx";
+import {useQuoteThreadMutation} from "../app/services/threadApi.ts";
 import { useCreateThreadMutation, useUpdateThreadMutation } from "../app/services/threadApi.ts";
 import {toast} from "react-toastify";
 import {setUser} from "../app/features/userSlice.ts";
@@ -117,8 +118,9 @@ type CreateEditThreadProps = {
     onOpen: () => void;
     onOpenChange: (open: boolean) => void;
     toBeUpdatedThread?: ThreadType;
+    toBeRepostedThread?: ThreadType;
 }
-export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpdatedThread}: CreateEditThreadProps) {
+export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpdatedThread, toBeRepostedThread}: CreateEditThreadProps) {
     const [threads, setThreads] = React.useState<ThreadType[]>([]);
     React.useEffect(() => {
         if (toBeUpdatedThread) {
@@ -136,6 +138,8 @@ export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpda
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const user = useSelector((state) => state.user.user);
+
+    const [quoteThread, {isLoading: isQuotingThread}] = useQuoteThreadMutation();
 
     const [createThread, {isLoading: isCreatingThread}] = useCreateThreadMutation();
     const [updateThread, {isLoading: isUpdatingThread}] = useUpdateThreadMutation();
@@ -204,9 +208,32 @@ export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpda
         }
     }
 
+    const handleQuoteThread = async (onClose: () => void) => {
+        const thread = threads[0];
+        const formData = new FormData();
+        formData.append("content", thread.content || "");
+        if (thread.picture) {
+            formData.append("picture", thread.picture);
+        }
+        try {
+            const res = await quoteThread({id: toBeRepostedThread?.id || "", data: formData});
+            console.log(res);
+            dispatch(setUser({
+                ...user,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                QuotedThreads: [...user.QuotedThreads, res.data.thread.QuoteToId],
+            }));
+            onClose();
+        } catch (err) {
+            console.log(err);
+            toast.error("Something went wrong");
+        }
+    }
+
     return (
         <>
-            {(isCreatingThread || isUpdatingThread) && <Loader/>}
+            {(isCreatingThread || isUpdatingThread || isQuotingThread) && <Loader/>}
             <Modal placement="center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="outside">
                 <ModalContent>
                     {(onClose) => (
@@ -224,16 +251,6 @@ export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpda
                                         )
                                     })
                                 }
-                                {/*<Button*/}
-                                {/*    color="secondary"*/}
-                                {/*    variant="flat"*/}
-                                {/*    onPress={addThread}*/}
-                                {/*    style={{*/}
-                                {/*        display: toBeUpdatedThread ? "none" : "block",*/}
-                                {/*    }}*/}
-                                {/*>*/}
-                                {/*    Add Thread*/}
-                                {/*</Button>*/}
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onClose}>
@@ -247,23 +264,41 @@ export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpda
                                             onPress={() => {
                                                 handleUpdateThread(onClose);
                                             }}
-                                            isLoading={isCreatingThread || isUpdatingThread}
-                                            disabled={isCreatingThread || isUpdatingThread}
+                                            isLoading={isCreatingThread || isUpdatingThread || isQuotingThread}
+                                            disabled={isCreatingThread || isUpdatingThread || isQuotingThread}
                                         >
                                             Update
                                         </Button>
                                     ) : (
-                                        <Button
-                                            color="primary"
-                                            variant="light"
-                                            onPress={() => {
-                                                handleCreateThread(onClose);
-                                            }}
-                                            isLoading={isCreatingThread || isUpdatingThread}
-                                            disabled={isCreatingThread || isUpdatingThread}
-                                        >
-                                            Create
-                                        </Button>
+                                        <>
+                                            {
+                                                toBeRepostedThread ? (
+                                                    <Button
+                                                        color="primary"
+                                                        variant="light"
+                                                        onPress={() => {
+                                                            handleQuoteThread(onClose);
+                                                        }}
+                                                        isLoading={isCreatingThread || isUpdatingThread || isQuotingThread}
+                                                        disabled={isCreatingThread || isUpdatingThread || isQuotingThread}
+                                                    >
+                                                        Quote
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        color="primary"
+                                                        variant="light"
+                                                        onPress={() => {
+                                                            handleCreateThread(onClose);
+                                                        }}
+                                                        isLoading={isCreatingThread || isUpdatingThread || isQuotingThread}
+                                                        disabled={isCreatingThread || isUpdatingThread || isQuotingThread}
+                                                    >
+                                                        Create
+                                                    </Button>
+                                                )
+                                            }
+                                        </>
                                     )
                                 }
                             </ModalFooter>

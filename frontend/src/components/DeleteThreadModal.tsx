@@ -31,6 +31,14 @@ function DeleteThreadModal({isOpen, onOpen, onOpenChange, thread}: CreateEditThr
                     ...user,
                     CreatedThreads: user?.CreatedThreads?.filter((t: { id: string | number; }) => t.id !== thread.id),
                 }));
+                dispatch(setUser({
+                    ...user,
+                    RepostedThreads: user?.RepostedThreads?.filter((t: { id: string | number; }) => t.id !== thread.id),
+                }))
+                dispatch(setUser({
+                    ...user,
+                    QuotedThreads: user?.QuotedThreads?.filter((t: { id: string | number; }) => t.id !== thread?.QuoteTo?.id),
+                }))
                 onClose();
             })
             .catch((err) => {

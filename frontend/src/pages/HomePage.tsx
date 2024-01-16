@@ -41,11 +41,11 @@ function HomePage() {
                             allThreads={allThreads}
                             setAllThreads={setAllThreads}
                             child={
-                                thread?.RepostTo ? (
+                                thread?.QuoteTo ? (
                                     <PostCard
                                         child={null}
                                         isChild={true}
-                                        thread={thread.RepostTo}
+                                        thread={thread.QuoteTo}
                                         allThreads={allThreads}
                                         setAllThreads={setAllThreads}
                                     />

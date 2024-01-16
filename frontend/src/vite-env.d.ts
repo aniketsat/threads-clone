@@ -1,10 +1,20 @@
 /// <reference types="vite/client" />
+type ProfileType = {
+    id: string | number;
+    username: string;
+    avatar?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
 type ThreadType = {
     id: string | number;
     content?: string;
     picture?: string;
     isDeleted?: boolean;
+    RepostedBy?: ProfileType;
     RepostTo?: ThreadType;
+    QuotedBy?: ProfileType;
+    QuoteTo?: ThreadType;
     createdAt?: string;
     updatedAt?: string;
     Creator?: {
