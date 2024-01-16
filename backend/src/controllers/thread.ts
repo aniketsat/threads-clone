@@ -100,7 +100,14 @@ const getAllThreads = asyncHandler(async (req, res) => {
                     Likes: true,
                     Comments: true,
                 }
-            }
+            },
+            RepostTo: {
+                include: {
+                    Creator: true,
+                    Likes: true,
+                    Comments: true,
+                }
+            },
         },
         orderBy: {
             createdAt: 'desc'
@@ -254,7 +261,8 @@ const getThreadsByUser = asyncHandler(async (req, res) => {
                 id: profileExists.id
             },
             isDeleted: false,
-            RepostedBy: null
+            RepostedBy: null,
+            QuotedBy: null,
         },
         include: {
             Creator: true,
@@ -377,7 +385,7 @@ const repostThread = asyncHandler(async (req, res) => {
             picture: threadExists.picture,
             Creator: {
                 connect: {
-                    id: threadExists?.CreatorId
+                    id: userExists?.Profile?.id
                 }
             },
             RepostedBy: {
@@ -399,6 +407,146 @@ const repostThread = asyncHandler(async (req, res) => {
     });
 });
 
+const getRepostsByUser = asyncHandler(async (req, res) => {
+    // @ts-ignore
+    const user = req.user;
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        include: {
+            Profile: true
+        }
+    });
+    if (!userExists) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Get username from params
+    const { username } = req.params;
+
+    // Check if any profile exists with the username
+    const profileExists = await prisma.profile.findUnique({
+        where: {
+            username
+        }
+    });
+    if (!profileExists) {
+        res.status(404);
+        throw new Error('Profile not found');
+    }
+
+    // Get threads that are reposted by the user
+    const threads = await prisma.thread.findMany({
+        where: {
+            RepostedById: profileExists.id,
+            isDeleted: false
+        },
+        include: {
+            Creator: true,
+            Likes: true,
+            Comments: true,
+            RepostedBy: true,
+            QuotedBy: true,
+            QuoteTo: {
+                include: {
+                    Creator: true,
+                    Likes: true,
+                    Comments: true,
+                }
+            },
+            RepostTo: {
+                include: {
+                    Creator: true,
+                    Likes: true,
+                    Comments: true,
+                }
+            },
+        },
+        orderBy: {
+            createdAt: 'desc'
+        },
+    });
+
+    res.status(200).json({
+        message: 'Threads fetched successfully',
+        threads
+    });
+});
+
+const getQuotesByUser = asyncHandler(async (req, res) => {
+    // @ts-ignore
+    const user = req.user;
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        include: {
+            Profile: true
+        }
+    });
+    if (!userExists) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Get username from params
+    const { username } = req.params;
+
+    // Check if any profile exists with the username
+    const profileExists = await prisma.profile.findUnique({
+        where: {
+            username
+        }
+    });
+    if (!profileExists) {
+        res.status(404);
+        throw new Error('Profile not found');
+    }
+
+    // Get threads that are quoted by the user
+    const threads = await prisma.thread.findMany({
+        where: {
+            QuotedById: profileExists.id,
+            isDeleted: false
+        },
+        include: {
+            Creator: true,
+            Likes: true,
+            Comments: true,
+            RepostedBy: true,
+            QuotedBy: true,
+            QuoteTo: {
+                include: {
+                    Creator: true,
+                    Likes: true,
+                    Comments: true,
+                }
+            },
+            RepostTo: {
+                include: {
+                    Creator: true,
+                    Likes: true,
+                    Comments: true,
+                }
+            },
+        },
+        orderBy: {
+            createdAt: 'desc'
+        },
+    });
+
+    res.status(200).json({
+        message: 'Threads fetched successfully',
+        threads
+    });
+});
+
 
 export {
     createThread,
@@ -408,5 +556,7 @@ export {
     deleteThread,
     getThreadsByUser,
     quoteThread,
-    repostThread
+    repostThread,
+    getRepostsByUser,
+    getQuotesByUser
 }

@@ -1,7 +1,7 @@
 import express from 'express';
 import { postParser } from "../middlewares/uploadMiddleware";
 import { protect } from "../middlewares/authMiddleware";
-import { createThread, getAllThreads, getThread, updateThread, deleteThread, getThreadsByUser, quoteThread, repostThread } from "../controllers/thread";
+import { createThread, getAllThreads, getThread, updateThread, deleteThread, getThreadsByUser, quoteThread, repostThread, getQuotesByUser, getRepostsByUser } from "../controllers/thread";
 
 
 const router = express.Router();
@@ -45,6 +45,16 @@ router.post('/quote/:id', protect, postParser.single('picture'), quoteThread);
 // @route   POST /api/thread/repost/:id
 // @access  Private
 router.post('/repost/:id', protect, postParser.single('picture'), repostThread);
+
+// @desc    Get quotes by user
+// @route   GET /api/thread/quote/user/:username
+// @access  Private
+router.get('/quote/user/:username', protect, getQuotesByUser);
+
+// @desc    Get reposts by user
+// @route   GET /api/thread/repost/user/:username
+// @access  Private
+router.get('/repost/user/:username', protect, getRepostsByUser);
 
 
 export default router;
