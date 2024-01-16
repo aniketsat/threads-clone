@@ -45,7 +45,9 @@ model Profile {
 
   Likes Like[]
 
-  Quotes Thread[] @relation("Quote")
+  Reposts Thread[] @relation("Repost")
+
+  Quotes Thread[] @relation("QuoteProfile")
 
   Bookmarks Bookmark[]
 
@@ -77,13 +79,20 @@ model Thread {
 
   Likes Like[]
 
-  QuotedBy   Profile? @relation("Quote", fields: [QuotedById], references: [id])
-  QuotedById String?  @db.ObjectId
-
-  // Which thread is this thread a repost of?
-  RepostTo   Thread?  @relation("RepostThread", fields: [RepostToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  RepostTo   Thread?  @relation("Repost", fields: [RepostToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   RepostToId String?  @db.ObjectId
-  RepostFrom Thread[] @relation("RepostThread")
+  RepostFrom Thread[] @relation("Repost")
+
+  RepostedBy   Profile? @relation("Repost", fields: [RepostedById], references: [id])
+  RepostedById String?  @db.ObjectId
+
+  // Which thread is this thread a quote of?
+  QuoteTo   Thread?  @relation("QuoteThread", fields: [QuoteToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  QuoteToId String?  @db.ObjectId
+  QuoteFrom Thread[] @relation("QuoteThread")
+
+  QuotedBy   Profile? @relation("QuoteProfile", fields: [QuotedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  QuotedById String?  @db.ObjectId
 
   Bookmarks Bookmark[]
 

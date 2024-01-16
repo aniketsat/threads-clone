@@ -31,7 +31,14 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             Followers: true,
             Followings: true,
             Threads: true,
-            Bookmarks: true
+            Bookmarks: true,
+            Quotes: true,
+            Reposts: true,
+            Likes: {
+                include: {
+                    Thread: true
+                }
+            }
         }
     });
 
@@ -46,10 +53,14 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             bio: currentUser.Profile?.bio,
             profileId: profile?.id,
             profileType: currentUser.Profile?.profileType,
-            followers: profile?.Followers?.map(follower => follower.id),
-            following: profile?.Followings?.map(following => following.id),
+            followers: profile?.Followers?.map(follower => follower.FollowingId),
+            following: profile?.Followings?.map(following => following.FollowerId),
             CreatedThreads: profile?.Threads?.filter(thread => !thread.isDeleted).map(thread => thread.id),
-            BookmarkedThreads: profile?.Bookmarks?.map(bookmark => bookmark.ThreadId)
+            BookmarkedThreads: profile?.Bookmarks?.map(bookmark => bookmark.ThreadId),
+            // @ts-ignore
+            LikedThreads: profile?.Likes?.filter(like => !like.Thread.isDeleted).map(like => like.ThreadId),
+            QuotedThreads: profile?.Quotes?.filter(quote => !quote.isDeleted).map(quote => quote.QuoteToId),
+            RepostedThreads: profile?.Reposts?.filter(repost => !repost.isDeleted).map(repost => repost.RepostToId),
         }
     });
 });
@@ -112,7 +123,7 @@ const updateCurrentUser = asyncHandler(async (req, res) => {
             username: updatedProfile?.username,
             avatar: updatedProfile?.avatar,
             bio: updatedProfile?.bio,
-            profileType: updatedProfile?.profileType
+            profileType: updatedProfile?.profileType,
         }
     });
 });

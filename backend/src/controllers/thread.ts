@@ -92,11 +92,13 @@ const getAllThreads = asyncHandler(async (req, res) => {
             Creator: true,
             Likes: true,
             Comments: true,
+            RepostedBy: true,
             QuotedBy: true,
-            RepostTo: {
+            QuoteTo: {
                 include: {
                     Creator: true,
                     Likes: true,
+                    Comments: true,
                 }
             }
         },
@@ -251,20 +253,16 @@ const getThreadsByUser = asyncHandler(async (req, res) => {
             Creator: {
                 id: profileExists.id
             },
-            isDeleted: false
+            isDeleted: false,
+            RepostedBy: null
         },
         include: {
             Creator: true,
             Likes: true,
             Comments: true,
+            RepostedBy: true,
             QuotedBy: true,
-            RepostTo: {
-                include: {
-                    Creator: true,
-                    Likes: true,
-                    Comments: true,
-                }
-            }
+            QuoteTo: true,
         },
         orderBy: {
             createdAt: 'desc'
@@ -277,6 +275,130 @@ const getThreadsByUser = asyncHandler(async (req, res) => {
     });
 });
 
+const quoteThread = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+    const {content} = req.body;
+    const picture = req.file;
+
+    // @ts-ignore
+    const user = req.user;
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        include: {
+            Profile: true
+        }
+    });
+    if (!userExists) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Check if thread exists
+    const threadExists = await prisma.thread.findUnique({
+        where: {
+            id
+        }
+    });
+    if (!threadExists) {
+        res.status(404);
+        throw new Error('Thread not found');
+    }
+
+    // Create a new thread with the quoted content and picture
+    // and add the user profile as the QuotedBy
+    const thread = await prisma.thread.create({
+        data: {
+            content,
+            picture: picture?.path,
+            Creator: {
+                connect: {
+                    id: userExists?.Profile?.id
+                }
+            },
+            QuotedBy: {
+                connect: {
+                    id: userExists?.Profile?.id
+                }
+            },
+            QuoteTo: {
+                connect: {
+                    id: threadExists?.id
+                }
+            }
+        }
+    });
+
+    res.status(201).json({
+        message: 'Thread quoted',
+        thread
+    });
+});
+
+const repostThread = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+
+    // @ts-ignore
+    const user = req.user;
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        include: {
+            Profile: true
+        }
+    });
+    if (!userExists) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Check if thread exists
+    const threadExists = await prisma.thread.findUnique({
+        where: {
+            id
+        }
+    });
+    if (!threadExists) {
+        res.status(404);
+        throw new Error('Thread not found');
+    }
+
+    // Create a new thread with the same content and picture as the original thread
+    // and add the user profile as the RepostedBy
+    const thread = await prisma.thread.create({
+        data: {
+            content: threadExists.content,
+            picture: threadExists.picture,
+            Creator: {
+                connect: {
+                    id: threadExists?.CreatorId
+                }
+            },
+            RepostedBy: {
+                connect: {
+                    id: userExists?.Profile?.id
+                }
+            },
+            RepostTo: {
+                connect: {
+                    id: threadExists?.id
+                }
+            }
+        }
+    });
+
+    res.status(201).json({
+        message: 'Thread reposted',
+        thread
+    });
+});
+
 
 export {
     createThread,
@@ -284,5 +406,7 @@ export {
     getThread,
     updateThread,
     deleteThread,
-    getThreadsByUser
+    getThreadsByUser,
+    quoteThread,
+    repostThread
 }
