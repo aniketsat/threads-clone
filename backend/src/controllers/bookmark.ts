@@ -155,6 +155,15 @@ const getBookmarksByUser = asyncHandler(async (req, res) => {
                     Creator: true,
                     Likes: true,
                     Comments: true,
+                    RepostedBy: true,
+                    QuotedBy: true,
+                    QuoteTo: {
+                        include: {
+                            Creator: true,
+                            Likes: true,
+                            Comments: true,
+                        }
+                    }
                 }
             }
         },

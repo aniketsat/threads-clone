@@ -157,7 +157,7 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
     return (
         <>
             {(isLikeLoading || isUnlikeLoading || isCreateBookmarkLoading || isDeleteBookmarkLoading || isRepostThreadLoading) && <Loader />}
-            <div className="w-full p-2" style={{border: "1px solid #eaeaea", borderRadius: "8px", marginTop: 0, width:"100%"}}>
+            <div className="w-full p-2" style={{border: "1px solid #eaeaea", borderRadius: "8px", marginTop: 0, width:"100%", marginBottom:"0.25rem"}}>
                 {
                     thread?.RepostedBy && (
                         <p className="text-gray-50 text-xs" style={{
@@ -189,31 +189,33 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
                     <User
                         name={<Link
                             as={RouterLink}
-                            to={`/@${thread?.Creator?.username}`}
+                            to={
+                                thread?.RepostTo ? `/@${thread?.RepostTo?.Creator?.username}` : `/@${thread?.Creator?.username}`
+                            }
                             size="sm"
                             style={{
                                 fontSize: "1.05rem",
                                 fontWeight: 700,
                             }}>
-                            @{thread?.Creator?.username}
+                            @{thread?.RepostTo ? thread?.RepostTo?.Creator?.username : thread?.Creator?.username}
                         </Link>}
                         description={(
                             <p className="text-gray-50 text-xs">
                                 {
                                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                                     // @ts-expect-error
-                                    new Date(thread?.createdAt as string).toGMTString().slice(0, -7)
+                                    new Date(thread?.RepostTo ? thread?.RepostTo?.createdAt : thread?.createdAt).toGMTString().slice(0, -7)
                                 }
                             </p>
                         )}
                         avatarProps={{
-                            src: thread?.Creator?.avatar,
-                            alt: thread?.Creator?.username,
+                            src: thread?.RepostTo ? thread?.RepostTo?.Creator?.avatar : thread?.Creator?.avatar,
+                            alt: thread?.RepostTo ? thread?.RepostTo?.Creator?.username : thread?.Creator?.username,
                         }}
                     />
 
                     {
-                        isChild ? null : (
+                        (isChild || thread?.RepostedBy) ? null : (
                             <Dropdown>
                                     <DropdownTrigger>
                                         <Button isIconOnly color="default" variant="light" aria-label="Three Dots">
@@ -261,7 +263,24 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
                                         ) : (
                                             <DropdownMenu aria-label="Static Actions">
                                                 <DropdownItem key="follow">Follow</DropdownItem>
-                                                <DropdownItem key="bookmark">Bookmark</DropdownItem>
+                                                <DropdownItem
+                                                    key="bookmark"
+                                                    onClick={() => {
+                                                        if (user?.BookmarkedThreads?.includes(thread?.id)) {
+                                                            handleDeleteBookmark();
+                                                        } else {
+                                                            handleCreateBookmark();
+                                                        }
+                                                    }}
+                                                >
+                                                    {
+                                                        user?.BookmarkedThreads?.includes(thread?.id) ? (
+                                                            "Unbookmark"
+                                                        ) : (
+                                                            "Bookmark"
+                                                        )
+                                                    }
+                                                </DropdownItem>
                                             </DropdownMenu>
                                         )
                                     }
@@ -321,38 +340,43 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
                                 <FaRegComment className="text-2xl text-gray-500 cursor-pointer ml-2 icon"/>
                                 <AiOutlineShareAlt className="text-2xl text-gray-500 cursor-pointer ml-2 icon"/>
                             </div>
-                            <div className="flex flex-row items-center">
-                                <Dropdown>
-                                    <DropdownTrigger>
-                                        <Button isIconOnly color="default" variant="light" aria-label="Three Dots" style={{
-                                            padding: 0
-                                        }}>
-                                            <BiRepost className="text-2xl text-gray-500 cursor-pointer"/>
-                                        </Button>
-                                    </DropdownTrigger>
-                                    <DropdownMenu aria-label="Static Actions">
-                                        <DropdownItem
-                                            key="quote"
-                                            onClick={() => {
-                                                onQuoteThreadModalOpen();
-                                            }}>
-                                                Quote Thread
-                                        </DropdownItem>
-                                        <DropdownItem
-                                            key="repost"
-                                            onClick={handleRepost}
-                                        >
-                                            Repost Thread
-                                        </DropdownItem>
-                                    </DropdownMenu>
-                                </Dropdown>
-                                <CreateEditThread
-                                    isOpen={isQuoteThreadModalOpen}
-                                    onOpen={onQuoteThreadModalOpen}
-                                    onOpenChange={onQuoteThreadModalOpenChange}
-                                    toBeRepostedThread={thread}
-                                />
-                            </div>
+                            {
+                                thread?.RepostedBy ? null : (
+                                    <div className="flex flex-row items-center">
+                                        <Dropdown>
+                                            <DropdownTrigger>
+                                                <Button isIconOnly color="default" variant="light"
+                                                        aria-label="Three Dots" style={{
+                                                    padding: 0
+                                                }}>
+                                                    <BiRepost className="text-2xl text-gray-500 cursor-pointer"/>
+                                                </Button>
+                                            </DropdownTrigger>
+                                            <DropdownMenu aria-label="Static Actions">
+                                                <DropdownItem
+                                                    key="quote"
+                                                    onClick={() => {
+                                                        onQuoteThreadModalOpen();
+                                                    }}>
+                                                    Quote Thread
+                                                </DropdownItem>
+                                                <DropdownItem
+                                                    key="repost"
+                                                    onClick={handleRepost}
+                                                >
+                                                    Repost Thread
+                                                </DropdownItem>
+                                            </DropdownMenu>
+                                        </Dropdown>
+                                        <CreateEditThread
+                                            isOpen={isQuoteThreadModalOpen}
+                                            onOpen={onQuoteThreadModalOpen}
+                                            onOpenChange={onQuoteThreadModalOpenChange}
+                                            toBeRepostedThread={thread}
+                                        />
+                                    </div>
+                                )
+                            }
                         </div>
                     )
                 }

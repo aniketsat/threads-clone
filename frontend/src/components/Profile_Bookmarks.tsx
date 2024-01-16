@@ -16,8 +16,7 @@ function ProfileBookmarks({username}: PropType) {
     const [allThreads, setAllThreads] = React.useState<ThreadType[]>([]);
 
     const {data, isLoading, refetch} = useGetBookmarkByUserQuery(username);
-    console.log(data);
-    
+
     React.useEffect(() => {
         if (data?.bookmarks) {
             let threads = data?.bookmarks.map((bookmark: BookmarkType) => bookmark.Thread);
@@ -50,7 +49,20 @@ function ProfileBookmarks({username}: PropType) {
                 }
                 {
                     allThreads?.map((thread: ThreadType) => (
-                        <PostCard child={null} allThreads={allThreads} setAllThreads={setAllThreads} thread={thread} key={thread.id} />
+                        <PostCard
+                            child={thread?.QuoteTo ?
+                                <PostCard
+                                    thread={thread?.QuoteTo}
+                                    allThreads={allThreads}
+                                    setAllThreads={setAllThreads}
+                                    key={thread?.QuoteTo.id}
+                                    child={null}
+                                />
+                                : null}
+                            allThreads={allThreads}
+                            setAllThreads={setAllThreads}
+                            thread={thread}
+                            key={thread.id} />
                     ))
                 }
             </div>

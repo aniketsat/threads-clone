@@ -1,51 +1,53 @@
-import React from "react";
+import React from 'react';
+import {useGetQuotesByUserQuery} from "../app/services/threadApi.ts";
+import {useSelector} from "react-redux";
 import Loader from "./Loader.tsx";
-import {useGetThreadsByUserQuery} from "../app/services/threadApi.ts";
 import PostCard from "./PostCard.tsx";
-import {user} from "@nextui-org/react";
-
 
 type PropType = {
     username: string;
 };
-function ProfilePosts({username}: PropType) {
+function ProfileQuotes({username}: PropType) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const user = useSelector((state) => state.user.user);
+
     const [allThreads, setAllThreads] = React.useState<ThreadType[]>([]);
 
-    const {data, isLoading, refetch} = useGetThreadsByUserQuery(username);
+    const {data, isLoading, refetch} = useGetQuotesByUserQuery(username);
 
     React.useEffect(() => {
         if (data?.threads) {
             setAllThreads(data?.threads);
         }
     }, [data?.threads]);
-    
+
     React.useEffect(() => {
         const refetchData = async () => {
             await refetch();
         }
         refetchData();
-        
+
         return () => {
             setAllThreads([]);
         }
-    }, [refetch, username, user]);
+    }, [refetch, username, user?.QuotedThreads]);
 
     return (
         <>
             {isLoading && <Loader />}
-            <div className="w-full" style={{ width: "100%" }}>
+            <div className="w-full">
                 {
                     allThreads && allThreads?.length === 0 && (
                         <div className="w-full flex justify-center items-center">
-                            <h1 className="text-xl font-semibold">No Posts</h1>
+                            <h1 className="text-xl font-semibold">No Quotes</h1>
                         </div>
                     )
                 }
                 {
                     allThreads?.map((thread: ThreadType) => (
                         <PostCard
-                            child={
-                                thread?.QuoteTo ?
+                            child={thread?.QuoteTo ?
                                 <PostCard
                                     isChild={true}
                                     thread={thread?.QuoteTo}
@@ -54,13 +56,11 @@ function ProfilePosts({username}: PropType) {
                                     key={thread?.QuoteTo.id}
                                     child={null}
                                 />
-                                : null
-                            }
+                                : null}
                             allThreads={allThreads}
                             setAllThreads={setAllThreads}
                             thread={thread}
-                            key={thread.id}
-                        />
+                            key={thread.id} />
                     ))
                 }
             </div>
@@ -68,4 +68,4 @@ function ProfilePosts({username}: PropType) {
     );
 }
 
-export default ProfilePosts;
+export default ProfileQuotes;

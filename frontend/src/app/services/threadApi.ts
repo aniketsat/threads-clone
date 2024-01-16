@@ -47,7 +47,24 @@ export const threadApi = apiSlice.injectEndpoints({
                     method: "POST",
                 }),
             }),
+        getQuotesByUser: builder.query({
+                query: (username) => `/thread/quote/user/${username}`,
+            }),
+        getRepostsByUser: builder.query({
+                query: (username) => `/thread/repost/user/${username}`,
+            }),
   }),
 });
 
-export const { useCreateThreadMutation, useGetAllThreadsQuery, useGetThreadQuery, useUpdateThreadMutation, useDeleteThreadMutation, useGetThreadsByUserQuery, useRepostThreadMutation, useQuoteThreadMutation } = threadApi;
+export const {
+    useCreateThreadMutation,
+    useGetAllThreadsQuery,
+    useGetThreadQuery,
+    useUpdateThreadMutation,
+    useDeleteThreadMutation,
+    useGetThreadsByUserQuery,
+    useRepostThreadMutation,
+    useQuoteThreadMutation ,
+    useGetQuotesByUserQuery,
+    useGetRepostsByUserQuery
+} = threadApi;

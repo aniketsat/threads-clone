@@ -11,6 +11,8 @@ import EditProfileModal from "../components/EditProfileModal.tsx";
 import FollowModal from "../components/FollowModal.tsx";
 import Profile_Posts from "../components/Profile_Posts.tsx";
 import Profile_Bookmarks from "../components/Profile_Bookmarks.tsx";
+import Profile_Quotes from "../components/Profile_Quotes.tsx";
+import Profile_Reposts from "../components/Profile_Reposts.tsx";
 
 
 function ProfilePage() {
@@ -157,10 +159,10 @@ function ProfilePage() {
                                 <Profile_Posts username={username?.slice(1) || ""} />
                             </Tab>
                             <Tab title="Quotes">
-                                <p>Quotes</p>
+                                <Profile_Quotes username={username?.slice(1) || ""} />
                             </Tab>
                             <Tab title="Reposts">
-                                <p>Reposts</p>
+                                <Profile_Reposts username={username?.slice(1) || ""} />
                             </Tab>
                             <Tab title="Bookmarks">
                                 <Profile_Bookmarks username={username?.slice(1) || ""} />
