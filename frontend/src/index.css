@@ -23,6 +23,7 @@ main {
 
 .nav-main-menu {
     display: flex;
+    gap: 36px;
 }
 .nav-side-menu {
     display: none;

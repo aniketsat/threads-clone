@@ -10,10 +10,9 @@ import {
     useDisclosure,
     Button, Divider
 } from "@nextui-org/react";
-import {Link as RouterLink} from "react-router-dom";
+import {Link as RouterLink, useNavigate} from "react-router-dom";
 import { BsThreeDots } from "react-icons/bs";
 import { FaRegComment } from "react-icons/fa";
-import { AiOutlineShareAlt } from "react-icons/ai";
 import { BiRepost } from "react-icons/bi";
 import { AiFillHeart } from "react-icons/ai";
 import { AiOutlineHeart } from "react-icons/ai";
@@ -35,6 +34,8 @@ type PropType = {
     isChild?: boolean;
 };
 function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropType) {
+    const navigate = useNavigate();
+
     const {isOpen:isCreateEditThreadModalOpen, onOpen: onCreateEditThreadModalOpen, onOpenChange: onCreateEditThreadModalOpenChange} = useDisclosure();
     const {isOpen:isDeleteThreadModalOpen, onOpen: onDeleteThreadModalOpen, onOpenChange: onDeleteThreadModalOpenChange} = useDisclosure();
     const {isOpen:isQuoteThreadModalOpen, onOpen: onQuoteThreadModalOpen, onOpenChange: onQuoteThreadModalOpenChange} = useDisclosure();
@@ -157,33 +158,44 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
     return (
         <>
             {(isLikeLoading || isUnlikeLoading || isCreateBookmarkLoading || isDeleteBookmarkLoading || isRepostThreadLoading) && <Loader />}
-            <div className="w-full p-2" style={{border: "1px solid #eaeaea", borderRadius: "8px", marginTop: 0, width:"100%", marginBottom:"0.25rem"}}>
-                {
-                    thread?.RepostedBy && (
-                        <p className="text-gray-50 text-xs" style={{
-                            fontWeight: 600,
-                            fontSize: "0.75rem",
-                            marginTop: "0.25rem",
-                            marginBottom: "0.25rem",
-                            color: "#9CA3AF",
-                        }}>
-                            <Link as={RouterLink} to={`/@${thread?.RepostedBy?.username}`} size="sm" style={{
-                                fontSize: "0.75rem",
+            <div
+                className="w-full p-2"
+                onClick={() => navigate(`/post/${thread?.id}`)}
+                style={{
+                    border: "1px solid #eaeaea",
+                    borderRadius: "8px",
+                    marginTop: 0,
+                    width:"100%",
+                    marginBottom:"0.25rem"
+            }}>
+                <>
+                    {
+                        thread?.RepostedBy && (
+                            <p className="text-gray-50 text-xs" style={{
                                 fontWeight: 600,
+                                fontSize: "0.75rem",
+                                marginTop: "0.25rem",
+                                marginBottom: "0.25rem",
+                                color: "#9CA3AF",
                             }}>
-                                @{thread?.RepostedBy?.username}
-                            </Link> reposted
-                        </p>
-                    )
-                }
-                {
-                    thread?.RepostedBy && (
-                        <Divider style={{
-                            marginTop: "0.25rem",
-                            marginBottom: "0.25rem",
-                        }} />
-                    )
-                }
+                                <Link as={RouterLink} to={`/@${thread?.RepostedBy?.username}`} size="sm" style={{
+                                    fontSize: "0.75rem",
+                                    fontWeight: 600,
+                                }}>
+                                    @{thread?.RepostedBy?.username}
+                                </Link> reposted
+                            </p>
+                        )
+                    }
+                    {
+                        thread?.RepostedBy && (
+                            <Divider style={{
+                                marginTop: "0.25rem",
+                                marginBottom: "0.25rem",
+                            }} />
+                        )
+                    }
+                </>
 
                 <div className="flex flex-row items-center justify-between">
                     <User
@@ -262,7 +274,6 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
                                             </DropdownMenu>
                                         ) : (
                                             <DropdownMenu aria-label="Static Actions">
-                                                <DropdownItem key="follow">Follow</DropdownItem>
                                                 <DropdownItem
                                                     key="bookmark"
                                                     onClick={() => {
@@ -303,26 +314,35 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
                     />
                 </div>
 
-                {
-                    thread?.content && (
-                        <p className="text-gray-50 text-sm mt-2">
-                            {thread?.content}
-                        </p>
-                    )
-                }
+                <React.Fragment>
+                    {
+                        thread?.content && (
+                            <p className="text-gray-50 text-sm mt-2">
+                                {thread?.content}
+                            </p>
+                        )
+                    }
+                    {
+                        thread?.picture && (
+                            <Image
+                                src={thread?.picture}
+                                width="100%"
+                                height="auto"
+                                className="mt-2"
+                            />
+                        )
+                    }
+                </React.Fragment>
 
-                {
-                    thread?.picture && (
-                        <Image
-                            src={thread?.picture}
-                            width="100%"
-                            height="auto"
-                            className="mt-2"
-                        />
-                    )
-                }
-
-                <div className="mt-2 ml-2">
+                <div
+                    className="mt-2 ml-2"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (thread?.QuoteTo) {
+                            navigate(`/post/${thread?.QuoteTo?.id}`)
+                        }
+                    }}
+                >
                     {child}
                 </div>
 
@@ -338,7 +358,6 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
                                     )
                                 }
                                 <FaRegComment className="text-2xl text-gray-500 cursor-pointer ml-2 icon"/>
-                                <AiOutlineShareAlt className="text-2xl text-gray-500 cursor-pointer ml-2 icon"/>
                             </div>
                             {
                                 thread?.RepostedBy ? null : (

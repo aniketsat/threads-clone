@@ -57,10 +57,10 @@ export default function Appbar({darkMode, setDarkMode}: PropType) {
         {
             label: "Create",
         },
-        {
-            label: "Notifications",
-            href: "/notifications",
-        },
+        // {
+        //     label: "Notifications",
+        //     href: "/notifications",
+        // },
         {
             label: "Profile",
             href: `@${user?.username}`

@@ -8,6 +8,7 @@ import SearchPage from "./pages/SearchPage.tsx";
 import NotificationPage from "./pages/NotificationPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
+import ThreadPage from "./pages/ThreadPage.tsx";
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
                     <Route path="/notifications" element={<NotificationPage />} />
                     <Route path="/:username" element={<ProfilePage />} />
                     <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/post/:threadId" element={<ThreadPage />} />
                 </Route>
             </Routes>
         </Layout>
