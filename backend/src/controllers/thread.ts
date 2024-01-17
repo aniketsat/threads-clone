@@ -121,7 +121,61 @@ const getAllThreads = asyncHandler(async (req, res) => {
 });
 
 const getThread = asyncHandler(async (req, res) => {
-    res.send('Get a thread');
+    const {id} = req.params;
+
+    // @ts-ignore
+    const user = req.user;
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        include: {
+            Profile: true,
+        }
+    });
+    if (!userExists) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    // Check if thread exists
+    const threadExists = await prisma.thread.findUnique({
+        where: {
+            id
+        },
+        include: {
+            Creator: true,
+            Likes: true,
+            Comments: true,
+            RepostedBy: true,
+            QuotedBy: true,
+            QuoteTo: {
+                include: {
+                    Creator: true,
+                    Likes: true,
+                    Comments: true,
+                }
+            },
+            RepostTo: {
+                include: {
+                    Creator: true,
+                    Likes: true,
+                    Comments: true,
+                }
+            },
+        }
+    });
+    if (!threadExists) {
+        res.status(404);
+        throw new Error('Thread not found');
+    }
+
+    res.status(200).json({
+        message: 'Thread fetched successfully',
+        thread: threadExists
+    });
 });
 
 const updateThread = asyncHandler(async (req, res) => {
