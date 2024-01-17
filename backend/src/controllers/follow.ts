@@ -33,7 +33,7 @@ const followUser = asyncHandler(async (req, res) => {
     }
 
     // Check if user's id is the same as the id in the params
-    if (id === currentUserProfile.id) {
+    if (profileExists.id === currentUserProfile.id) {
         res.status(400);
         throw new Error("You cannot follow yourself");
     }
@@ -42,7 +42,7 @@ const followUser = asyncHandler(async (req, res) => {
     const isFollowing = await prisma.follow.findFirst({
         where: {
             FollowerId: currentUserProfile.id,
-            FollowingId: id
+            FollowingId: profileExists.id
         }
     });
     if (isFollowing) {
@@ -53,8 +53,16 @@ const followUser = asyncHandler(async (req, res) => {
     // Follow the user's profile
     await prisma.follow.create({
         data: {
-            FollowerId: currentUserProfile.id,
-            FollowingId: id
+            Follower: {
+                connect: {
+                    id: currentUserProfile.id
+                }
+            },
+            Following: {
+                connect: {
+                    id: profileExists.id
+                }
+            }
         }
     });
 
@@ -90,7 +98,7 @@ const unfollowUser = asyncHandler(async (req, res) => {
     });
 
     // Check if user's id is the same as the id in the params
-    if (id === currentUserProfile?.id) {
+    if (profileExists.id === currentUserProfile?.id) {
         res.status(400);
         throw new Error("You cannot unfollow yourself");
     }
@@ -99,7 +107,7 @@ const unfollowUser = asyncHandler(async (req, res) => {
     const isFollowing = await prisma.follow.findFirst({
         where: {
             FollowerId: currentUserProfile?.id,
-            FollowingId: id
+            FollowingId: profileExists.id
         }
     });
     if (!isFollowing) {
@@ -111,7 +119,7 @@ const unfollowUser = asyncHandler(async (req, res) => {
     await prisma.follow.deleteMany({
         where: {
             FollowerId: currentUserProfile?.id,
-            FollowingId: id
+            FollowingId: profileExists.id
         }
     });
 

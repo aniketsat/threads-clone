@@ -73,14 +73,14 @@ const getAllThreads = asyncHandler(async (req, res) => {
                 },
                 {
                     Creator: {
-                        id: userExists?.Profile?.id
+                        id: userExists.Profile?.id
                     }
                 },
                 {
                     Creator: {
-                        Followers: {
+                        Followings: {
                             some: {
-                                id: userExists?.Profile?.id
+                                FollowerId: userExists.Profile?.id
                             }
                         }
                     }
