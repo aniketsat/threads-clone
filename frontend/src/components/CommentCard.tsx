@@ -10,6 +10,7 @@ import Loader from "./Loader.tsx";
 import {useSelector, useDispatch} from "react-redux";
 import {setUser} from "../app/features/userSlice.ts";
 import {useGetAllRepliesQuery, useDeleteCommentMutation} from "../app/services/commentApi.ts";
+import {useLikeCommentMutation, useUnlikeCommentMutation} from "../app/services/likeApi.ts";
 
 
 type PropTypes = {
@@ -28,12 +29,18 @@ function CommentCard({comment}:PropTypes) {
 
     const [allReplies, setAllReplies] = React.useState<CommentType[]>([]);
 
-    const {data: allRepliesData, isLoading: allRepliesLoading} = useGetAllRepliesQuery(comment?.id);
+    const {data: allRepliesData, isLoading: allRepliesLoading, refetch} = useGetAllRepliesQuery(comment?.id);
     React.useEffect(() => {
         if (allRepliesData?.comments) {
             setAllReplies(allRepliesData?.comments);
         }
     }, [allRepliesData?.comments]);
+    React.useEffect(() => {
+        const reload = async () => {
+            await refetch();
+        }
+        reload();
+    }, [refetch, user.CreatedComments, user.LikedComments]);
 
     const {isOpen:isEditCommentOpen, onOpen: onEditCommentOpen, onOpenChange: onEditCommentOpenChange} = useDisclosure();
 
@@ -54,9 +61,44 @@ function CommentCard({comment}:PropTypes) {
         }
     };
 
+    const [likeComment, {isLoading: isLikingComment}] = useLikeCommentMutation();
+    const [unlikeComment, {isLoading: isUnlikingComment}] = useUnlikeCommentMutation();
+
+    const handleLikeComment = async () => {
+        try {
+            const res = await likeComment(comment?.id);
+            dispatch(setUser({
+                ...user,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                LikedComments: [...user.LikedComments, res?.data?.like?.CommentId],
+            }));
+            toast.success("Comment liked successfully");
+        } catch (error) {
+            console.log(error);
+            toast.error("Something went wrong");
+        }
+    };
+
+    const handleUnlikeComment = async () => {
+        try {
+            const res = await unlikeComment(comment?.id);
+            dispatch(setUser({
+                ...user,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                LikedComments: user.LikedComments.filter((comm:string) => comm !== res?.data?.like?.CommentId),
+            }));
+            toast.success("Comment unliked successfully");
+        } catch (error) {
+            console.log(error);
+            toast.error("Something went wrong");
+        }
+    };
+
     return (
         <>
-            {(allRepliesLoading || isDeletingComment) && <Loader />}
+            {(allRepliesLoading || isDeletingComment || isLikingComment || isUnlikingComment) && <Loader />}
             <div
                 className="w-full"
                 style={{
@@ -144,8 +186,15 @@ function CommentCard({comment}:PropTypes) {
                                 width: "fit-content",
                                 marginTop: "10px",
                             }}>
-                                <AiFillHeart className="text-2xl text-red-500 cursor-pointer ml-2 icon"/>
-                                <AiOutlineHeart className="text-2xl text-gray-500 cursor-pointer ml-2 icon"/>
+                                {
+                                    user?.LikedComments?.includes(comment?.id) ? (
+                                        <AiFillHeart className="text-2xl text-red-500 cursor-pointer ml-2 icon"
+                                                     onClick={handleUnlikeComment}/>
+                                    ) : (
+                                        <AiOutlineHeart className="text-2xl text-gray-500 cursor-pointer ml-2 icon"
+                                                        onClick={handleLikeComment}/>
+                                    )
+                                }
                                 <FaRegComment className="text-2xl text-gray-500 cursor-pointer ml-2 icon"
                                               onClick={onCreateReplyOpen}/>
                             </div>

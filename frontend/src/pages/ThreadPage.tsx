@@ -50,7 +50,7 @@ function ThreadPage() {
             await refetch();
         }
         reload();
-    }, [refetch, user.CreatedComments, user]);
+    }, [refetch, user.CreatedComments, user.LikedComments]);
 
     return (
         <>

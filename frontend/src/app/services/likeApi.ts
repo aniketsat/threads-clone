@@ -15,8 +15,25 @@ const likeApi = apiSlice.injectEndpoints({
                 method: "DELETE",
             }),
         }),
+        likeComment: builder.mutation({
+            query: (id) => ({
+                url: `/like/comment/${id}`,
+                method: "POST",
+            }),
+        }),
+        unlikeComment: builder.mutation({
+            query: (id) => ({
+                url: `/like/comment/${id}`,
+                method: "DELETE",
+            }),
+        }),
     }),
 });
 
 
-export const {useLikePostMutation, useUnlikePostMutation} = likeApi;
+export const {
+    useLikePostMutation,
+    useUnlikePostMutation,
+    useLikeCommentMutation,
+    useUnlikeCommentMutation,
+} = likeApi;
