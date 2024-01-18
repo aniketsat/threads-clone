@@ -9,6 +9,7 @@ import followRouter from "./routes/follow";
 import threadRouter from "./routes/thread";
 import likeRouter from "./routes/like";
 import bookmarkRouter from "./routes/bookmark";
+import commentRouter from "./routes/comment";
 
 class Server {
     private app: Application;
@@ -21,6 +22,7 @@ class Server {
     private readonly threadRoute = '/api/thread';
     private readonly likeRoute = '/api/like';
     private readonly bookmarkRoute = '/api/bookmark';
+    private readonly commentRoute = '/api/comment';
 
     constructor() {
         this.app = express();
@@ -45,6 +47,7 @@ class Server {
         this.app.use(this.threadRoute, threadRouter);
         this.app.use(this.likeRoute, likeRouter);
         this.app.use(this.bookmarkRoute, bookmarkRouter);
+        this.app.use(this.commentRoute, commentRouter);
     }
 
     start() {

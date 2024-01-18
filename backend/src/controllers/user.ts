@@ -38,7 +38,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
                 include: {
                     Thread: true
                 }
-            }
+            },
+            Comments: true,
         }
     });
 
@@ -62,6 +63,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             LikedThreads: profile?.Likes?.filter(like => !like.Thread.isDeleted).map(like => like.ThreadId),
             QuotedThreads: profile?.Quotes?.filter(quote => !quote.isDeleted).map(quote => quote.QuoteToId),
             RepostedThreads: profile?.Reposts?.filter(repost => !repost.isDeleted).map(repost => repost.RepostToId),
+            CreatedComments: profile?.Comments?.filter(comment => !comment.isDeleted).map(comment => comment.id),
         }
     });
 });
