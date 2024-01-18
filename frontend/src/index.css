@@ -11,6 +11,9 @@ main {
     min-height: 100vh;
 }
 
+.fullWidth {
+    width: 100%;
+}
 .auth-tab-container {
     width: 420px;
 }

@@ -50,10 +50,10 @@ export default function Appbar({darkMode, setDarkMode}: PropType) {
             label: "Home",
             href: "/",
         },
-        {
-            label: "Search",
-            href: "/search",
-        },
+        // {
+        //     label: "Search",
+        //     href: "/search",
+        // },
         {
             label: "Create",
         },
