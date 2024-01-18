@@ -36,7 +36,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             Reposts: true,
             Likes: {
                 include: {
-                    Thread: true
+                    Thread: true,
+                    Comment: true
                 }
             },
             Comments: true,
@@ -60,10 +61,11 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             CreatedThreads: profile?.Threads?.filter(thread => !thread.isDeleted).map(thread => thread.id),
             BookmarkedThreads: profile?.Bookmarks?.map(bookmark => bookmark.ThreadId),
             // @ts-ignore
-            LikedThreads: profile?.Likes?.filter(like => !like.Thread.isDeleted).map(like => like.ThreadId),
+            LikedThreads: profile?.Likes?.filter(like => like.Thread && !like.Thread.isDeleted).map(like => like.ThreadId),
             QuotedThreads: profile?.Quotes?.filter(quote => !quote.isDeleted).map(quote => quote.QuoteToId),
             RepostedThreads: profile?.Reposts?.filter(repost => !repost.isDeleted).map(repost => repost.RepostToId),
             CreatedComments: profile?.Comments?.filter(comment => !comment.isDeleted).map(comment => comment.id),
+            LikedComments: profile?.Likes?.filter(like => like.Comment && !like.Comment.isDeleted).map(like => like.CommentId),
         }
     });
 });

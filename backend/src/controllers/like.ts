@@ -119,5 +119,126 @@ const unlikePost = asyncHandler(async (req, res) => {
     });
 });
 
+const likeComment = asyncHandler(async (req, res) => {
+    const {id} = req.params;
 
-export {likePost, unlikePost};
+    // @ts-ignore
+    const user = req.user;
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        include: {
+            Profile: true
+        }
+    });
+    if (!userExists) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    // Check if comment exists
+    const commentExists = await prisma.comment.findUnique({
+        where: {
+            id
+        }
+    });
+    if (!commentExists) {
+        res.status(404);
+        throw new Error("Comment not found");
+    }
+
+    // Check if user has already liked the comment
+    const likeExists = await prisma.like.findFirst({
+        where: {
+            CommentId: commentExists.id,
+            ProfileId: userExists?.Profile?.id
+        }
+    });
+    if (likeExists) {
+        res.status(400);
+        throw new Error("You have already liked this comment");
+    }
+
+    // Create the like
+    const like = await prisma.like.create({
+        data: {
+            Profile: {
+                connect: {
+                    id: userExists?.Profile?.id
+                }
+            },
+            Comment: {
+                connect: {
+                    id: commentExists.id
+                }
+            }
+        }
+    });
+
+    res.status(201).json({
+        message: "Comment liked successfully",
+        like
+    });
+});
+
+const unlikeComment = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+
+    // @ts-ignore
+    const user = req.user;
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        include: {
+            Profile: true
+        }
+    });
+    if (!userExists) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    // Check if comment exists
+    const commentExists = await prisma.comment.findUnique({
+        where: {
+            id
+        }
+    });
+    if (!commentExists) {
+        res.status(404);
+        throw new Error("Comment not found");
+    }
+
+    // Check if user has already liked the comment
+    const likeExists = await prisma.like.findFirst({
+        where: {
+            CommentId: commentExists.id,
+            ProfileId: userExists?.Profile?.id
+        }
+    });
+    if (!likeExists) {
+        res.status(400);
+        throw new Error("You have not liked this comment");
+    }
+
+    // Delete the like
+    await prisma.like.delete({
+        where: {
+            id: likeExists.id
+        }
+    });
+
+    res.status(200).json({
+        message: "Comment unliked successfully",
+        like: likeExists
+    });
+});
+
+
+export {likePost, unlikePost, likeComment, unlikeComment};
