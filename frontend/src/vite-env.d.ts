@@ -5,6 +5,7 @@ type ProfileType = {
     avatar?: string;
     createdAt?: string;
     updatedAt?: string;
+    UserId?: string;
 }
 type ThreadType = {
     id: string | number;
@@ -40,4 +41,18 @@ type BookmarkType = {
     createdAt: string;
     updatedAt: string;
     Thread: ThreadType;
+}
+type CommentType = {
+    id: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+    isDeleted?: boolean;
+    Profile?: ProfileType;
+    Thread?: ThreadType;
+    ParentId?: string;
+    Likes?: {
+        id: string;
+    }[];
+    Children?: CommentType[];
 }

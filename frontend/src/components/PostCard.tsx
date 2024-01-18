@@ -167,7 +167,8 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
                     marginTop: 0,
                     width:"100%",
                     marginBottom:"0.25rem"
-            }}>
+                }}
+            >
                 <>
                     {
                         thread?.RepostedBy && (
@@ -314,36 +315,70 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
                     />
                 </div>
 
-                <React.Fragment>
-                    {
-                        thread?.content && (
-                            <p className="text-gray-50 text-sm mt-2">
-                                {thread?.content}
-                            </p>
-                        )
-                    }
-                    {
-                        thread?.picture && (
-                            <Image
-                                src={thread?.picture}
-                                width="100%"
-                                height="auto"
-                                className="mt-2"
-                            />
-                        )
-                    }
-                </React.Fragment>
+                {
+                    thread?.RepostTo && thread?.RepostTo?.isDeleted ? (
+                        <p className="text-gray-50 text-sm" style={{
+                            border: "1px solid #a0a0a0",
+                            borderRadius: "8px",
+                            marginTop: "0.5rem",
+                            width:"100%",
+                            marginBottom:"0.25rem",
+                            padding: "0.5rem",
+                        }}>
+                            This thread has been deleted
+                        </p>
+                    ) : (
+                        <React.Fragment>
+                            {
+                                thread?.content && (
+                                    <div className="text-gray-50 text-sm mt-2" >
+                                        {thread?.content}
+                                    </div>
+                                )
+                            }
+                            {
+                                thread?.picture && (
+                                    <Image
+                                        src={thread?.picture}
+                                        width="100%"
+                                        height="auto"
+                                        className="mt-2"
+                                    />
+                                )
+                            }
+                        </React.Fragment>
+                    )
+                }
+
 
                 <div
                     className="mt-2 ml-2"
                     onClick={(e) => {
                         e.stopPropagation();
-                        if (thread?.QuoteTo) {
+                        if (thread?.QuoteTo && !thread?.QuoteTo?.isDeleted) {
                             navigate(`/post/${thread?.QuoteTo?.id}`)
                         }
                     }}
                 >
-                    {child}
+                    {
+                        thread?.QuoteTo?.isDeleted ? (
+                            <p className="text-gray-50 text-sm" style={{
+                                border: "1px solid #a0a0a0",
+                                borderRadius: "8px",
+                                marginTop: 0,
+                                width:"100%",
+                                marginBottom:"0.25rem",
+                                padding: "0.5rem",
+                            }}>
+                                This thread has been deleted
+                            </p>
+                        ) : (
+                            <>
+                                {child}
+                            </>
+                        )
+                    }
+
                 </div>
 
                 {
@@ -352,9 +387,15 @@ function PostCard( { child, thread, allThreads, setAllThreads, isChild }:PropTyp
                             <div className="flex flex-row items-center justify-center">
                                 {
                                     thread?.Likes?.find((like) => like.ProfileId === user?.profileId) ? (
-                                        <AiFillHeart className="text-2xl text-red-500 cursor-pointer ml-2 icon" onClick={handleUnlike}/>
+                                        <AiFillHeart className="text-2xl text-red-500 cursor-pointer ml-2 icon" onClick={(e: { stopPropagation: () => void; }) => {
+                                            e.stopPropagation();
+                                            handleUnlike();
+                                        }}/>
                                     ) : (
-                                        <AiOutlineHeart className="text-2xl text-gray-500 cursor-pointer ml-2 icon" onClick={handleLike}/>
+                                        <AiOutlineHeart className="text-2xl text-gray-500 cursor-pointer ml-2 icon" onClick={(e: { stopPropagation: () => void; }) => {
+                                            e.stopPropagation();
+                                            handleLike();
+                                        }}/>
                                     )
                                 }
                                 <FaRegComment className="text-2xl text-gray-500 cursor-pointer ml-2 icon"/>

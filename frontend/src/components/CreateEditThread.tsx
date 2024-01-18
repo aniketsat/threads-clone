@@ -238,7 +238,23 @@ export default function CreateEditThread({isOpen, onOpen, onOpenChange, toBeUpda
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <ModalHeader className="flex flex-col gap-1">Create A New Thread</ModalHeader>
+                            <ModalHeader className="flex flex-col gap-1">
+                                {
+                                    toBeUpdatedThread ? (
+                                        "Update Thread"
+                                    ) : (
+                                        <>
+                                            {
+                                                toBeRepostedThread ? (
+                                                    "Quote Thread"
+                                                ) : (
+                                                    "Create a new Thread"
+                                                )
+                                            }
+                                        </>
+                                    )
+                                }
+                            </ModalHeader>
                             <ModalBody>
                                 {
                                     threads.map((thread) => {
