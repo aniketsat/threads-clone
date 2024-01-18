@@ -57,7 +57,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
             profileType: currentUser.Profile?.profileType,
             following: profile?.Followers?.map(follower => follower.FollowingId),
             followers: profile?.Followings?.map(following => following.FollowerId),
-            profile, // for testing
             CreatedThreads: profile?.Threads?.filter(thread => !thread.isDeleted).map(thread => thread.id),
             BookmarkedThreads: profile?.Bookmarks?.map(bookmark => bookmark.ThreadId),
             // @ts-ignore
