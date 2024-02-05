@@ -41,6 +41,8 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
             api.dispatch(setAccessToken(accessToken));
             api.dispatch(setRefreshToken(refreshToken));
             result = await baseQuery(args, api, extraOptions);
+        } else {
+            api.dispatch(logout());
         }
     } else if (result?.error?.status === 401) {
         api.dispatch(logout());
